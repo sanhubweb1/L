@@ -1,0 +1,672 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Loan Tracker</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..700&display=swap" rel="stylesheet"><script>try{document.documentElement.dataset.theme='light'}catch(e){document.documentElement.dataset.theme='auto'}
+function showErr(m){try{let e=document.getElementById('er');if(!e){e=document.createElement('div');e.id='er';(document.body||document.documentElement).appendChild(e)}e.innerHTML='<b>⚠️ App error</b><span></span><button onclick="this.parentNode.remove()">Close</button>';e.children[1].textContent=m}catch(x){}}
+window.addEventListener('error',ev=>{const t=ev.target;if(t&&t.tagName=='SCRIPT')showErr('Load failed: '+(t.src||'').split('/').pop()+' (internet check karo)');else if(!t||t===window)showErr((ev.message||'Unknown error')+(ev.lineno?' (line '+ev.lineno+')':''))},true);
+window.addEventListener('unhandledrejection',ev=>showErr('Failed: '+((ev.reason&&ev.reason.message)||ev.reason||'unknown')));
+</script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);color-scheme:light;--bg:#fff;--cd:#f4f5f7;--tx:#111418;--mu:#6b7280;--ac:#007aff;--ok:#22a559;--bad:#e5362b;--wn:#f08a00;--bd:rgba(60,60,67,.14);--fl:rgba(120,120,128,.14);--nv:rgba(255,255,255,.88);--sg:#fff;--emi:#6d28d9}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0 auto;background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;padding:8px 16px 110px;max-width:640px;-webkit-font-smoothing:antialiased}
+h1{font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.6px;margin:14px 0 16px}
+h2{font-size:13px;font-weight:600;color:var(--mu);margin:24px 16px 7px;text-transform:none}
+.c{background:var(--cd);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.p{padding:16px}.mu{color:var(--mu);font-size:13px}.big{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px}
+.row+.row,.row+.fr,.fr+.fr{border-top:.5px solid var(--bd)}
+.hero{display:flex;align-items:center;gap:18px;padding:18px}
+.ring{position:relative;width:128px;height:128px;flex:none}.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:28px;letter-spacing:-.5px}
+.ring b span{font-size:12px;font-weight:500;color:var(--mu);letter-spacing:0}
+.st{flex:1;min-width:0}.st div{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:var(--mu)}.st div+div{border-top:.5px solid var(--bd)}.st b{color:var(--tx);font-size:15px}
+.big2{font-size:12px;color:var(--mu)}
+.al{padding:0}.al .hd{padding:14px 16px 4px;font-weight:600;display:flex;justify-content:space-between}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;margin-right:2px}
+.bar{height:8px;background:var(--fl);border-radius:5px;margin:10px 0 8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac);border-radius:5px}
+button,.btn{font:inherit;border:0;background:var(--fl);color:var(--ac);border-radius:100px;padding:7px 14px;cursor:pointer;font-size:14px;font-weight:600}
+button:active{opacity:.55}
+button.pri{background:var(--ac);color:#fff}
+button.t{background:none;padding:7px 8px;color:var(--ac);font-weight:500}button.t.d{color:var(--bad)}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.wn{color:var(--wn)}
+.fr{display:flex;align-items:center;gap:10px;padding:0 16px}.fr label{flex:0 0 46%;font-size:16px;color:var(--tx);margin:0;padding:13px 0}
+.fr input{border:0;background:none;text-align:right;color:var(--ac);font:inherit;padding:13px 0;width:100%;outline:none;min-width:0}
+input[type=file]{margin-top:10px;font-size:14px;color:var(--mu)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--nv);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-top:.5px solid var(--bd);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));justify-content:center}
+nav button{flex:1;max-width:140px;background:none;border-radius:0;color:var(--mu);font-size:10px;font-weight:500;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+nav button.on{color:var(--ac)}nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav i{position:absolute;top:0;left:calc(50% + 6px);background:var(--bad);color:#fff;font-style:normal;font-size:11px;font-weight:600;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+#t{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:100px;display:none;font-size:14px;font-weight:500;white-space:nowrap}
+.seg{display:flex;background:var(--fl);border-radius:9px;padding:2px;margin-bottom:12px}.seg button{flex:1;border-radius:7px;background:none;color:var(--tx);padding:7px;font-weight:500}.seg button.on{background:var(--sg);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.lr{padding:10px 16px}.lr svg{display:block}
+.sheet{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:18px;color:var(--tx)}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.kp div{background:var(--cd);border-radius:8px;padding:9px}.kp b{display:block;font-size:14px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:680px}th{text-align:left;color:var(--mu);font-weight:600;padding:7px 6px;border-bottom:1.5px solid var(--tx)}td{padding:8px 6px;border-bottom:.5px solid var(--bd)}td.n,th.n{text-align:right}tfoot td{font-weight:700;border-top:1.5px solid var(--tx);border-bottom:0}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:10px;text-align:center}.cg em{font-style:normal;font-size:12px;color:var(--mu);padding:4px 0}.dy{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;border-radius:10px;cursor:pointer;font-weight:500}.dy span{width:30px;height:30px;line-height:30px;border-radius:50%;font-size:16px}.dy.td span{background:var(--ac);color:#fff;font-weight:700}.dy.sl{background:var(--fl)}.dy u{display:flex;gap:3px;height:6px}.dy s{width:6px;height:6px;border-radius:50%;display:block}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}.chips button{white-space:nowrap;background:var(--fl);color:var(--tx);font-weight:500}.chips button.on{background:var(--ac);color:#fff}
+.emi{color:var(--emi);font-weight:700}
+:root[data-theme=dark]{--bg:#000;--cd:#1c1c1e;--tx:#f2f2f7;--mu:#98989f;--ac:#0a84ff;--ok:#30d158;--bad:#ff453a;--wn:#ff9f0a;--bd:rgba(84,84,88,.5);--fl:rgba(120,120,128,.28);--nv:rgba(22,22,24,.88);--sg:#636366;--emi:#c4a8ff;color-scheme:dark}
+@media(prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#000;--cd:#1c1c1e;--tx:#f2f2f7;--mu:#98989f;--ac:#0a84ff;--ok:#30d158;--bad:#ff453a;--wn:#ff9f0a;--bd:rgba(84,84,88,.5);--fl:rgba(120,120,128,.28);--nv:rgba(22,22,24,.88);--sg:#636366;--emi:#c4a8ff;color-scheme:dark}}
+.bb{max-width:88%;padding:10px 14px;border-radius:18px;margin-bottom:8px;font-size:15px;line-height:1.5}.bt{background:var(--cd);border-bottom-left-radius:5px}.us{background:var(--ac);color:#fff;margin-left:auto;width:fit-content;border-bottom-right-radius:5px}
+.qb{position:sticky;bottom:calc(66px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;background:var(--bg);padding:8px 0}.qb input{flex:1;min-width:0;border:0;background:var(--fl);color:var(--tx);border-radius:100px;padding:11px 16px;font:inherit;outline:none}
+@page{margin:14mm}
+@media print{:root{padding:0;--bg:#fff!important;--cd:#fff!important;--tx:#111!important;--mu:#6b7280!important;--bd:rgba(60,60,67,.14)!important;--emi:#111!important}body{padding:0;max-width:none;background:#fff}nav,#t,.noprint{display:none!important}.sheet{border:0;padding:0}.tw{overflow:visible}table{font-size:11px;min-width:0}}
+@media(max-width:380px){.hero{flex-direction:column}}
+.ds{display:flex;gap:2px;margin:12px 0 8px}.ds i{flex:1;height:14px;border-radius:3px;background:var(--fl);min-width:0}.ds i.f{background:var(--ac)}.ds i.t{background:var(--wn)}.ds i.x{background:var(--bad)}.ds i.ok{background:var(--ok)}
+
+/* v10 look */
+:root{--bg:#f2f4fa;--cd:#fff;--tx:#14172b;--mu:#6a6f87;--ac:#4338ca;--ac2:#6d5dfc;--ok:#0c9b6e;--bad:#e5484d;--wn:#e08600;--bd:rgba(20,23,43,.07);--fl:rgba(67,56,202,.08);--nv:rgba(255,255,255,.84);--sg:#fff;--emi:#6d28d9;--sh:0 1px 2px rgba(20,23,43,.04),0 10px 26px -14px rgba(30,27,90,.28);--fd:"Bricolage Grotesque","Figtree",system-ui,sans-serif}
+:root[data-theme=dark]{--bg:#0c0e1c;--cd:#161a2e;--tx:#eceeff;--mu:#9296b3;--ac:#8e86ff;--ac2:#a99bff;--ok:#34d3a0;--bad:#ff6b70;--wn:#ffb02e;--bd:rgba(255,255,255,.07);--fl:rgba(142,134,255,.14);--nv:rgba(16,19,36,.84);--sg:#2a2f4d;--emi:#c4b5ff;--sh:0 10px 26px -14px #000}
+@media(prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#0c0e1c;--cd:#161a2e;--tx:#eceeff;--mu:#9296b3;--ac:#8e86ff;--ac2:#a99bff;--ok:#34d3a0;--bad:#ff6b70;--wn:#ffb02e;--bd:rgba(255,255,255,.07);--fl:rgba(142,134,255,.14);--nv:rgba(16,19,36,.84);--sg:#2a2f4d;--emi:#c4b5ff;--sh:0 10px 26px -14px #000}}
+body{font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+h1{font-family:var(--fd);font-size:32px;letter-spacing:-1.1px}
+h2{font-family:var(--fd);font-size:15px;font-weight:600;color:var(--tx);margin:26px 4px 10px}
+.c{background:var(--cd);border-radius:22px;box-shadow:var(--sh);border:1px solid var(--bd)}
+.big,.emi,.ring b,.kp b,.st b,.hf b{font-family:var(--fd);font-variant-numeric:tabular-nums}
+.row{padding:14px 16px}
+.hero{background:linear-gradient(150deg,#1b1948 0%,#2d2888 55%,#4a3fd6 100%);color:#fff;flex-wrap:wrap;border:0;padding:20px;box-shadow:0 18px 36px -18px rgba(53,44,170,.7)}
+.hero .ring svg circle:first-child{stroke:rgba(255,255,255,.16)}.hero .ring svg circle:last-child{stroke:#5ff2c0}
+.hero .ring b{color:#fff}.hero .ring b span,.hero .st div{color:rgba(255,255,255,.72)}
+.hero .st b{color:#fff!important}.hero .st b.ok{color:#5ff2c0!important}.hero .st div:last-child b{color:#ffc2c4!important}
+.hero .st div+div{border-color:rgba(255,255,255,.14)}
+.hf{flex:0 0 100%;padding:11px 14px;border-radius:14px;background:rgba(255,255,255,.12);font-size:14px;color:rgba(255,255,255,.85)}.hf b{color:#fff;font-size:15px}
+button{transition:transform .12s,opacity .12s}button:active{transform:scale(.96);opacity:1}
+button.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 8px 16px -8px var(--ac)}
+.al{border-left:4px solid var(--wn)}
+.fr{transition:background .15s}.fr:focus-within{background:var(--fl)}
+.bar{height:9px}.bar i{background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.ds i{height:16px;border-radius:5px}
+.seg{border-radius:14px;padding:3px}.seg button{border-radius:11px}
+.chips button{background:var(--cd);border:1px solid var(--bd);box-shadow:var(--sh)}.chips button.on{background:var(--ac);color:#fff;border-color:transparent}
+.dy.td span{background:linear-gradient(135deg,var(--ac),var(--ac2))}
+nav{left:50%;right:auto;transform:translateX(-50%);width:calc(100% - 24px);max-width:616px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:6px;border:1px solid var(--bd);border-radius:26px;box-shadow:0 14px 34px -12px rgba(20,23,43,.4)}
+nav button{border-radius:19px;padding:7px 0}nav button.on{background:var(--fl);color:var(--ac)}
+#t{bottom:104px}.qb{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.dz{display:flex;gap:14px;align-items:center;padding:16px;margin-bottom:14px;border:1.5px dashed var(--ac);border-radius:22px;background:var(--fl);cursor:pointer;transition:transform .12s}.dz:active{transform:scale(.98)}
+.dz b{display:block;font-family:var(--fd);font-size:16px}.dz .mu{display:block;margin-top:2px}
+.dzi{flex:none;width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center}
+.dzi svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#ds{margin:-6px 6px 12px}
+:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{.c{box-shadow:none;border:0}}
+
+.br{margin-top:14px}.sb{display:flex;gap:2px;height:10px;border-radius:6px;overflow:hidden;margin-top:6px;min-width:14%}.sb i{display:block;height:100%}
+.mb{display:flex;align-items:stretch;gap:5px;height:118px;margin-top:14px}.mb div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--mu)}.mb b{flex:1;width:100%;display:flex;align-items:flex-end}.mb i{width:100%;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--ac2),var(--ac))}
+.ind{display:flex;align-items:center;gap:14px;padding:16px}.pul{width:16px;height:16px;border-radius:50%;background:currentColor;box-shadow:0 0 0 7px color-mix(in srgb,currentColor 18%,transparent);flex:none;margin:0 7px}
+.lg{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--mu)}.lg u{text-decoration:none}.lg u:before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--k);margin-right:5px}
+
+.sch td small{display:block;color:var(--mu);font-size:11px}
+@media print{thead{display:table-header-group}tr{break-inside:avoid}.sch table{font-size:11px}}
+
+nav{overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button{flex:1 0 62px;max-width:none}
+#er{position:fixed;left:12px;right:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:99;max-width:616px;margin:0 auto;background:var(--bad);color:#fff;border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 12px 30px -10px rgba(0,0,0,.5);font-size:14px}#er span{flex:1;min-width:0;word-break:break-word}#er button{background:rgba(255,255,255,.22);color:#fff;padding:6px 12px}
+@media print{#er{display:none}}
+.paper{background:#fff!important;color:#111;--tx:#111;--mu:#6b7280;--bd:rgba(0,0,0,.12);--fl:#f1f1f6;padding:16px;overflow:hidden}.paper h2{color:#111;margin:18px 0 6px;font-size:14px}.paper tr.s td{font-weight:700;background:var(--fl)}.paper .kp{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}.paper table{min-width:0}
+@media print{.paper{padding:0}.paper .kp{display:flex;flex-wrap:wrap}}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--fl);color:var(--ac)}.tg.dl{background:color-mix(in srgb,var(--wn) 18%,transparent);color:var(--wn)}.gh{padding:9px 16px;background:var(--fl);font-size:13px;font-weight:700}
+.lv{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mu);margin-right:7px}.lv.on{background:var(--ok);animation:lvp 1.6s infinite}.lv.er{background:var(--bad)}@keyframes lvp{50%{opacity:.3}}
+.fx{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 8px}.fx div{background:var(--fl);border-radius:8px;padding:8px 6px;text-align:center}.fx b{display:block;font-size:14px}.fx span{font-size:11px;color:var(--mu)}
+/* finance look */
+:root{--ac:#6366f1}
+h1{font-family:'Bricolage Grotesque',sans-serif}
+.c{border-radius:18px;border:1px solid var(--bd);box-shadow:0 6px 20px rgba(99,102,241,.07)}
+.hero2{background:linear-gradient(135deg,#4f46e5,#7c3aed 55%,#0ea5e9);color:#fff;border-radius:24px;padding:22px;margin-bottom:14px;box-shadow:0 14px 30px rgba(79,70,229,.35)}
+.hl{font-size:13px;opacity:.8}.hb{font:700 38px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-1px;margin:4px 0}.hs{font-size:13px;opacity:.85}
+.hbar{height:8px;background:rgba(255,255,255,.25);border-radius:5px;margin:14px 0;overflow:hidden}.hbar i{display:block;height:100%;background:#fff;border-radius:5px}
+.hr{display:flex;justify-content:space-between;gap:8px}.hr span{display:block;font-size:11px;opacity:.75}.hr b{font-size:15px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.ft{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:14px}.ft span{display:block;font-size:12px;color:var(--mu)}.ft b{display:block;font-size:20px;margin-top:4px;letter-spacing:-.4px}.ft em{font-style:normal;font-size:11px;color:var(--mu)}
+nav{border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.06)}
+/* white theme, tiny fonts, square pies */
+html[data-theme=light]{--bg:#fff;--cd:#fff;--fl:#f1f3f6}
+#app{zoom:.78}nav button{font-size:9px}
+.hero2{background:#fff;color:var(--tx);border:1px solid var(--bd);box-shadow:0 6px 20px rgba(99,102,241,.08)}
+.hl,.hs,.hr span{color:var(--mu);opacity:1}.hbar{background:var(--fl)}.hbar i{background:var(--ac)}
+.sq{background:var(--cd);border:1px solid var(--bd);border-radius:16px;aspect-ratio:1/1;padding:10px;display:flex;flex-direction:column;overflow:hidden}.sq>b{font-size:12px}
+.pz{width:60%;margin:auto}.lgd{display:flex;flex-direction:column;gap:1px;font-size:10px;color:var(--mu)}.lgd i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+
+/* Desktop workspace + Classic/Modern view switch */
+#viewbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1600px;margin:0 auto 12px;padding:10px 12px;border:1px solid var(--bd);border-radius:16px;background:var(--cd);box-shadow:var(--sh);position:sticky;top:8px;z-index:40}
+#viewbar .vb-brand{font-weight:800;font-size:15px;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+#viewbar .vb-actions{display:flex;gap:6px;align-items:center}
+#viewbar button{padding:8px 13px;border-radius:10px;background:var(--fl);color:var(--tx);font-size:13px}
+#viewbar button.on{background:var(--ac);color:#fff;box-shadow:0 4px 12px color-mix(in srgb,var(--ac) 22%,transparent)}
+#viewbar .vb-hint{font-size:12px;color:var(--mu)}
+html[data-view-mode="classic"]{--bg:#f5f6f8;--cd:#fff;--tx:#20242c;--mu:#626b78;--ac:#1769aa;--ac2:#2687c9;--ok:#18864b;--bad:#c93030;--wn:#a96200;--bd:#d9dee5;--fl:#edf1f5;--nv:#fff;--sg:#fff;--sh:0 1px 3px rgba(0,0,0,.06);color-scheme:light}
+html[data-view-mode="classic"] body{font-family:Arial,Helvetica,sans-serif}
+html[data-view-mode="classic"] .c,html[data-view-mode="classic"] .hero,html[data-view-mode="classic"] .hero2{border-radius:8px;box-shadow:none}
+html[data-view-mode="classic"] .hero{background:#eef4f9;color:var(--tx);border:1px solid var(--bd)}
+html[data-view-mode="classic"] .hero .ring b,html[data-view-mode="classic"] .hero .st b{color:var(--tx)!important}
+html[data-view-mode="classic"] .hero .ring b span,html[data-view-mode="classic"] .hero .st div{color:var(--mu)}
+html[data-view-mode="classic"] .hf{background:#fff;color:var(--tx);border:1px solid var(--bd)}
+html[data-view-mode="classic"] .hf b{color:var(--tx)}
+html[data-view-mode="classic"] button,html[data-view-mode="classic"] .seg,html[data-view-mode="classic"] .seg button{border-radius:5px;box-shadow:none}
+html[data-view-mode="classic"] nav{border-radius:8px;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+@media(min-width:900px){
+ body{max-width:none;width:100%;padding:14px 24px 94px;margin:0}
+ #app{zoom:1!important;width:100%;max-width:1600px;margin:0 auto}
+ #viewbar{width:100%;padding:10px 16px}
+ h1{font-size:30px}
+ #app .c{margin-bottom:14px}
+ nav{left:50%;right:auto;transform:translateX(-50%);width:min(900px,calc(100% - 48px));max-width:900px;bottom:12px;border-radius:16px;padding:8px 14px}
+ nav button{font-size:12px;flex:1 1 0;max-width:220px}
+ #t{bottom:90px}
+}
+@media(max-width:899px){#viewbar{position:relative;top:auto;margin-bottom:10px}#viewbar .vb-hint{display:none}body{padding-top:8px}}
+@media(max-width:480px){#viewbar{padding:8px;border-radius:12px}#viewbar .vb-brand{font-size:13px}#viewbar button{padding:7px 9px;font-size:12px}#viewbar .vb-actions{gap:4px}}
+
+</style></head><body>
+<div id="viewbar" class="noprint"><div class="vb-brand"><span aria-hidden="true">▦</span> Loan Tracker <span class="vb-hint" id="desktopHint">Desktop workspace · fit-to-screen</span></div><div class="vb-actions"><button type="button" id="modernView" data-view="modern">Modern</button><button type="button" id="classicView" data-view="classic">Classic</button></div></div>
+<div id="app"></div><div id="t"></div>
+<nav id="nv"></nav>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>const K='loantracker_v1',$=s=>document.querySelector(s);
+const SEED=[['HDB Financial',29273,3969,8,'2026-07-04',0,3],['Bajaj Finance (84.9k)',84900,3538,24,'2025-04-02',0,18],['Bajaj Finance (71k)',71000,2958,24,'2025-04-02',0,18],['Poonawalla Fincorp',224000,8439,36,'2025-09-05',21,13],['KrazyBee',135000,10360,15,'2026-03-10',21.75,7],['Navi',210000,9600,27,'2025-03-01',18.46,20],['IDFC FIRST',64416,3038,24,'2025-05-03',12.17,17],['Kissht / Piramal',60000,5849,12,'2026-09-28',30,1],['LoanFront',25000,3928,7,'2026-05-29',29.22,5],['True Credits',19007,3567,6,'2026-08-30',42,2],['Lendingplate',17800,3452,6,'2026-09-10',54,1],['Innofin',15500,4413,4,'2026-10-01',42,0]];
+const ADD=[{id:9001,lender:'Aditya Birla Capital',principal:100000,emi:4568,n:30,first:'2026-11-05',rate:25.99,paid:0},{id:9002,lender:'SMFG India Credit',principal:80000,emi:7799,n:12,first:'2026-02-05',rate:29.99,paid:8},{id:9003,lender:'MoneyView',principal:105000,emi:4231,n:36,first:'2025-12-05',rate:0,paid:10}];
+const LND=[['ADITYA BIRLA','Aditya Birla Capital'],['MONEYVIEW','MoneyView'],['HDB','HDB Financial'],['SMFG','SMFG India Credit'],['LOANFRONT','LoanFront'],['BAJAJ','Bajaj Finance'],['POONAWALLA','Poonawalla Fincorp'],['TRUE CREDITS','True Credits'],['KRAZYBEE','KrazyBee'],['LENDINGPLATE','Lendingplate'],['NAVI','Navi'],['IDFC','IDFC FIRST'],['KISSHT','Kissht / Piramal'],['INNOFIN','Innofin']];
+let TH='light';
+let VM='list',L=load(),V='home',F=null,ed=null,D=[];
+function load(){let a=null,done=false;try{const s=localStorage.getItem(K);if(s)a=JSON.parse(s)}catch(e){}
+if(!a)a=SEED.map((a,i)=>({id:i+1,lender:a[0],principal:a[1],emi:a[2],n:a[3],first:a[4],rate:a[5],paid:a[6]}));
+try{done=!!localStorage.getItem(K+'_add1')}catch(e){}
+if(!done){ADD.forEach(o=>{if(!a.some(x=>x.id==o.id||x.lender==o.lender))a.push({...o})});try{localStorage.setItem(K+'_add1','1');localStorage.setItem(K,JSON.stringify(a))}catch(e){}}
+return a}
+function save(){try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}try{gsched()}catch(e){}}
+function pc(l){const t=today();let c=0;while(c<l.n&&due(l,c)<t)c++;return c}
+function autoPaid(){let ch=false;L.forEach(l=>{const c=pc(l);if(l.ac==null||c>l.ac){if(l.paid<c){l.paid=c;ch=true}l.ac=c;ch=true}else if(c<l.ac){l.ac=c;ch=true}});if(ch)save()}
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN'),fd=d=>d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
+function due(l,k){const f=new Date(l.first+'T00:00:00'),m=f.getMonth()+k,y=f.getFullYear()+Math.floor(m/12),mm=m%12;return new Date(y,mm,Math.min(f.getDate(),new Date(y,mm+1,0).getDate()))}
+const act=l=>l.paid<l.n,nxt=l=>due(l,l.paid),left=l=>(l.n-l.paid)*l.emi;
+function toast(m){const t=$('#t');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function go(v){V=v;if(v=='cal'){const t=today();CD=new Date(t.getFullYear(),t.getMonth(),1);SD=t.getDate()}if(v!='add'){F=null;ed=null}render();scrollTo(0,0)}
+const sum=(a,f)=>a.reduce((s,l)=>s+f(l),0),tot=l=>l.emi*l.n,days=l=>Math.round((nxt(l)-today())/864e5);
+const when=d=>d<0?(-d)+(d==-1?' day':' days')+' overdue':d==0?'Due today':d==1?'Due tomorrow':'Due in '+d+' days',clr=d=>d<0?'var(--bad)':d<=2?'var(--wn)':'var(--ac)';
+const alerts=()=>[...L.filter(act).map(l=>({l,d:days(l),ty:'EMI',amt:l.emi})),...DL.filter(dact).map(l=>{const c=dc(l);return{l,d:c.late?-c.late:c.left,ty:'Daily',amt:c.pay,pen:c.pen}})].filter(x=>x.d<=5).sort((a,b)=>a.d-b.d);
+let SF='due',CD=new Date(),SD=null;CD=new Date(CD.getFullYear(),CD.getMonth(),1);
+const IC={bot:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>',ins:'<path d="M4 20v-6M10 20V6M16 20v-9M22 20H2"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',print:'<path d="M7 9V3h10v6M7 17H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-3"/><rect x="7" y="14" width="10" height="7"/>',home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',loans:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',add:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',set:'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>'};
+function card(l){const d=days(l),a=act(l),late=a&&d<0;return `<div class="c p"><div class="r"><b style="font-size:17px">${l.lender}</b><b class="emi" style="font-size:17px">${inr(l.emi)}/mo</b></div>
+<div class="r" style="margin-top:6px;align-items:flex-end"><div><div class="big2">Remaining</div><div class="big" style="font-size:24px">${inr(left(l))}</div></div><div style="text-align:right"><div class="big2">Total loan</div><b>${inr(tot(l))}</b></div></div>
+<div class="bar"><i style="width:${l.paid/l.n*100}%;background:${a?'var(--ac)':'var(--ok)'}"></i></div>
+<div class="r mu"><span>${l.paid} of ${l.n} EMIs paid</span><span class="${late?'bad':d<=2&&a?'wn':''}" style="font-weight:600">${a?when(d)+' · '+fd(nxt(l)):'<span class=ok>Closed ✓</span>'}</span></div>
+${l.principal?`<div class="r mu" style="margin-top:8px"><span>Interest paid <b class="bad">${inr(an(l).ip)}</b></span><span>Interest left <b style="color:var(--tx)">${inr(an(l).il)}</b></span></div>`:''}<div class="r mu" style="margin-top:4px"><span>${a?ml(l)+' months left':'Finished'}</span><span>Ends ${mon(an(l).end)}</span></div>
+<div class="r" style="margin-top:12px"><span>${a?`<button class="pri" data-a="pay" data-id="${l.id}">Mark paid</button>`:''}</span><span><button class="t" data-a="undo" data-id="${l.id}">Undo</button><button class="t" data-a="edit" data-id="${l.id}">Edit</button><button class="t d" data-a="del" data-id="${l.id}">Delete</button></span></div></div>`}
+function home(){const A=L.filter(act),up=A.slice().sort((a,b)=>nxt(a)-nxt(b)),al=alerts();
+const mo=sum(A,l=>l.emi),T=sum(L,tot),out=sum(L,left),pd=T-out,pc=T?pd/T*100:0,C=2*Math.PI*54;
+return `<div class="r"><h1>Loan Tracker</h1><button class="pri" data-a="new">+ Add loan</button></div>
+${lvbar()}${al.length?`<div class="c al"><div class="hd"><span>EMI &amp; daily loan alerts</span><span style="color:${clr(al[0].d)}">${inr(sum(al,x=>x.amt))}</span></div>${al.map(x=>`<div class="row"><span class="r" style="justify-content:flex-start"><span class="dot" style="background:${clr(x.d)}"></span><span><b>${x.l.lender}</b> ${x.ty=='Daily'?'<span class="tg dl">Daily</span>':''}<br><span class="mu" style="color:${clr(x.d)}">${when(x.d)}${x.ty=='Daily'?' · due '+fd(DD(x.l.due))+(x.pen?' · penalty '+inr(x.pen):''):''}</span></span></span><span class="r"><b class="emi">${inr(x.amt)}</b><button class="pri" data-a="${x.ty=='Daily'?'dl_pay':'pay'}" data-id="${x.l.id}">Paid</button></span></div>`).join('')}</div>`:`<div class="c row"><span class="ok"><b>All clear</b></span><span class="mu">No EMI or daily loan due in the next 5 days</span></div>`}
+<div class="c hero"><div class="ring"><svg width="128" height="128" viewBox="0 0 128 128"><circle cx="64" cy="64" r="54" fill="none" stroke="var(--fl)" stroke-width="12"/><circle cx="64" cy="64" r="54" fill="none" stroke="var(--ok)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*pc/100} ${C}"/></svg><b>${Math.round(pc)}%<span>paid off</span></b></div>
+<div class="st"><div><span>Total loan</span><b>${inr(T)}</b></div><div><span>Paid</span><b class="ok">${inr(pd)}</b></div><div><span>Remaining</span><b style="color:var(--bad)">${inr(out)}</b></div></div>${A.length?`<div class="hf">Loan-free by <b>${mon(new Date(Math.max(...A.map(l=>+an(l).end))))}</b> &middot; ${A.length} active loans</div>`:''}</div>
+<div class="c"><div class="row"><span>Monthly EMI total</span><b>${inr(mo)}</b></div>${L.every(l=>l.principal)?`<div class="row"><span>Amount borrowed</span><b>${inr(sum(L,l=>l.principal))}</b></div><div class="row"><span>Interest &amp; charges</span><b>${inr(T-sum(L,l=>l.principal))}</b></div>`:''}<div class="row"><span>Active loans</span><b>${A.length} of ${L.length}</b></div></div>
+${fxcard()}${hind()}${dhome()}${hmo()}${hbrk()}<button class="pri" onclick="go('loans')" style="width:100%;padding:13px;margin-bottom:8px">Open all loans</button>`}
+const srt=()=>L.filter(act).sort(rk(SF)).concat(L.filter(l=>!act(l)));
+function mini(l){const a=act(l),d=days(l),p=l.paid/l.n,c=a?(d<0?'var(--bad)':d<=5?'var(--wn)':'var(--ac)'):'var(--ok)',R=15,C=2*Math.PI*R;
+return `<div class="row lr"><svg width="42" height="42" viewBox="0 0 42 42"><g transform="rotate(-90 21 21)"><circle cx="21" cy="21" r="${R}" fill="none" stroke="var(--fl)" stroke-width="5"/><circle cx="21" cy="21" r="${R}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C*p} ${C}"/></g><text x="21" y="24.5" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">${Math.round(p*100)}</text></svg>
+<span style="flex:1;min-width:0"><b>${l.lender}</b><br><span class="mu"><b class="emi">${inr(l.emi)}/mo</b> · <span style="color:${a&&d<=5&&(SF=='due'||EM())?c:''}">${a?(SF=='cost'?inr(an(l).il)+' interest left':SF=='long'||SF=='soon'?ml(l)+' months left · ends '+mon(an(l).end):when(d)+' · '+l.paid+'/'+l.n+' paid'):'Closed ✓'}</span></span></span><span style="text-align:right"><b>${inr(left(l))}</b><br><span class="mu">of ${inr(tot(l))}</span></span></div>`}
+function prt(){const A=L.filter(act),T=sum(L,tot),out=sum(L,left),X=L.map(an),TI=sum(X,a=>a.ti),IP=sum(X,a=>a.ip);
+return `<h1 class="noprint">Print preview</h1><div class="noprint" style="margin-bottom:14px"><button class="pri" data-a="prt" style="width:100%;padding:13px">Print / Save as PDF</button></div>
+<div class="sheet"><div class="r" style="align-items:flex-start"><div><div style="font-size:21px;font-weight:700">Loan summary</div><div class="mu">Printed on ${fd(new Date())}</div></div><div style="text-align:right"><div class="mu">Total remaining</div><div style="font-size:21px;font-weight:700">${inr(out)}</div></div></div>
+<div class="kp"><div><span class="mu">Total loan</span><b>${inr(T)}</b></div><div><span class="mu">Paid</span><b>${inr(T-out)}</b></div><div><span class="mu">Remaining</span><b>${inr(out)}</b></div><div><span class="mu">Monthly EMI</span><b>${inr(sum(A,l=>l.emi))}</b></div></div>
+<p style="margin:0 0 12px;font-size:13px"><b>Extra interest:</b> ${inr(TI)} total · ${inr(IP)} paid · ${inr(TI-IP)} still to pay</p><div class="tw"><table><thead><tr><th>Lender</th><th class="n">Loan amount</th><th class="n">EMI</th><th class="n">Paid</th><th class="n">Total payable</th><th class="n">Remaining</th><th>Next due</th><th class="n">Interest paid</th><th>Ends</th></tr></thead><tbody>${srt().map(l=>`<tr><td><b>${l.lender}</b></td><td class="n">${l.principal?inr(l.principal):'-'}</td><td class="n">${inr(l.emi)}</td><td class="n">${l.paid}/${l.n}</td><td class="n">${inr(tot(l))}</td><td class="n">${inr(left(l))}</td><td>${act(l)?fd(nxt(l)):'Closed'}</td><td class="n">${inr(an(l).ip)}</td><td>${mon(an(l).end)}</td></tr>`).join('')}</tbody>
+<tfoot><tr><td>Total</td><td class="n">${inr(sum(L,l=>l.principal))}</td><td class="n">${inr(sum(A,l=>l.emi))}</td><td></td><td class="n">${inr(T)}</td><td class="n">${inr(out)}</td><td></td><td class="n">${inr(IP)}</td><td></td></tr></tfoot></table></div></div>`}
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function cal(){const y=CD.getFullYear(),m=CD.getMonth(),t=today(),ev={};
+L.forEach(l=>{for(let k=0;k<l.n;k++){const d=due(l,k);if(d.getFullYear()==y&&d.getMonth()==m)(ev[d.getDate()]=ev[d.getDate()]||[]).push({l,k,d,p:k<l.paid})}});
+DL.forEach(l=>{const d=DD(l.due);if(d.getFullYear()==y&&d.getMonth()==m)(ev[d.getDate()]=ev[d.getDate()]||[]).push({l:{...l,emi:l.repay,n:1,paid:l.paid?1:0,daily:1},k:0,d,p:!!l.paid})});
+const all=Object.values(ev).flat(),sm=f=>sum(all.filter(f),e=>e.l.emi),first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+const st=e=>e.p?'var(--ok)':e.d<t?'var(--bad)':e.d-t<=5*864e5?'var(--wn)':'var(--ac)';
+let cells='';for(let i=0;i<first;i++)cells+='<i></i>';
+for(let d=1;d<=dim;d++){const es=ev[d]||[];cells+=`<b class="dy${+new Date(y,m,d)==+t?' td':''}${SD==d?' sl':''}" data-a="sd" data-s="${d}"><span>${d}</span><u>${es.slice(0,3).map(e=>`<s style="background:${st(e)}"></s>`).join('')}</u></b>`}
+const list=SD?(ev[SD]||[]):all.slice().sort((a,b)=>a.d-b.d);
+return `<h1>Calendar</h1><div class="c p"><div class="r"><button class="t" data-a="cm" data-d="-1">‹ Prev</button><b style="font-size:17px">${MN[m]} ${y}</b><button class="t" data-a="cm" data-d="1">Next ›</button></div><div class="cg">${'SMTWTFS'.split('').map(x=>`<em>${x}</em>`).join('')}${cells}</div></div>
+<div class="kp" style="grid-template-columns:repeat(3,1fr)"><div><span class="mu">Due this month</span><b>${inr(sm(()=>1))}</b></div><div><span class="mu">Paid</span><b class="ok">${inr(sm(e=>e.p))}</b></div><div><span class="mu">Pending</span><b class="bad">${inr(sm(e=>!e.p))}</b></div></div>
+<h2>${SD?SD+' '+MN[m]:'All EMIs in '+MN[m]}</h2><div class="c">${list.map(e=>`<div class="row"><span class="r" style="justify-content:flex-start"><span class="dot" style="background:${st(e)}"></span><span><b>${e.l.lender}</b><br><span class="mu">${SD?'':e.d.getDate()+' '+MN[m]+' · '}${e.l.daily?'Daily loan due':'EMI '+(e.k+1)+' of '+e.l.n}</span></span></span><span class="r"><span style="text-align:right"><b class="emi">${inr(e.l.emi)}</b><br><span class="mu" style="color:${st(e)}">${e.p?'Paid ✓':e.d<t?'Overdue':when(Math.round((e.d-t)/864e5))}</span></span>${!e.p&&e.k==e.l.paid?`<button class="pri" data-a="${e.l.daily?'dl_pay':'pay'}" data-id="${e.l.id}">Paid</button>`:''}</span></div>`).join('')||'<div class="row mu">No EMI due on this date.</div>'}</div>`}
+const mon=d=>d.toLocaleDateString('en-IN',{month:'short',year:'numeric'}),ml=l=>l.n-l.paid;
+function an(l){const P=+l.principal||0,E=l.emi,n=l.n,ti=P?Math.max(0,E*n-P):0;let i=0;
+if(P&&E*n>P*1.005){let lo=1e-9,hi=1;for(let k=0;k<80;k++){const m=(lo+hi)/2,f=P*m*Math.pow(1+m,n)/(Math.pow(1+m,n)-1);f<E?lo=m:hi=m}i=(lo+hi)/2}
+let bal=P,ip=0,pd=Math.min(l.paid,n);
+if(i){for(let k=0;k<pd;k++){const x=bal*i;ip+=x;bal-=E-x}}else{ip=ti*pd/n;bal=P?P*(1-pd/n):0}
+ip=Math.min(ip,ti);return{ti,ip,il:ti-ip,bal:Math.max(0,bal),rate:i*1200,ml:ml(l),end:due(l,n-1)}}
+const SFS=[['due','Due date'],['soon','Ending soon'],['long','Longest'],['cost','Costliest'],['emilo','Lowest EMI'],['emihi','Highest EMI']];
+const chips=()=>`<div class="chips">${SFS.map(f=>`<button class="${SF==f[0]?'on':''}" data-a="sf" data-f="${f[0]}">${f[1]}</button>`).join('')}</div>`;
+const EM=()=>SF=='emilo'||SF=='emihi';
+const rk=SF=>SF=='emilo'?(a,b)=>a.emi-b.emi:SF=='emihi'?(a,b)=>b.emi-a.emi:SF=='long'?(a,b)=>ml(b)-ml(a):SF=='cost'?(a,b)=>an(b).il-an(a).il:SF=='soon'?(a,b)=>ml(a)-ml(b):(a,b)=>nxt(a)-nxt(b);
+function ins(){const X=L.map(l=>({l,a:an(l)})),TI=sum(X,x=>x.a.ti),IP=sum(X,x=>x.a.ip),IL=TI-IP,P=sum(L,l=>l.principal),A=X.filter(x=>act(x.l)),bal=sum(A,x=>x.a.bal),t=today();
+const ends=A.slice().sort((a,b)=>a.a.end-b.a.end),last=ends[ends.length-1],nx=ends[0],mo=last?(last.a.end.getFullYear()-t.getFullYear())*12+last.a.end.getMonth()-t.getMonth():0;
+let br=sum(A,x=>x.l.emi);const R=A.slice().sort((a,b)=>rk(SF)(a.l,b.l)),v=x=>SF=='cost'?x.a.il:EM()?x.l.emi:x.a.ml,mx=Math.max(1,...R.map(v));
+return `<h1>Insights</h1>
+${last?`<div class="c p"><div class="mu">Debt-free by</div><div class="big">${mon(last.a.end)}</div><div class="mu">${mo} months to go · closing first: <b style="color:var(--tx)">${nx.l.lender}</b> (${mon(nx.a.end)})</div></div>`:''}
+<div class="c p"><div class="mu">Extra interest paid so far</div><div class="big bad">${inr(IP)}</div><div class="bar" style="height:10px"><i style="width:${TI?IP/TI*100:0}%;background:var(--bad)"></i></div>
+<div class="r mu"><span>Still to pay ${inr(IL)}</span><span>Total extra ${inr(TI)}</span></div><div class="r mu" style="margin-top:6px"><span>${P?Math.round(TI/P*100):0}% of amount borrowed</span><span>Principal left ${inr(bal)}</span></div></div>
+<h2>${EM()?'Loans by EMI amount':'Which loans end first'}</h2>${chips()}<div class="c">${R.map(x=>`<div class="row" style="display:block"><div class="r"><b>${x.l.lender}</b><span class="mu">${SF=='cost'?inr(x.a.il)+' interest left':EM()?'<b class=emi>'+inr(x.l.emi)+'/mo</b>':x.a.ml+' mo left · ends '+mon(x.a.end)}</span></div><div class="bar" style="margin:8px 0 0"><i style="width:${v(x)/mx*100}%;background:${SF=='cost'?'var(--bad)':EM()?'var(--emi)':'var(--ac)'}"></i></div><div class="r mu" style="margin-top:6px"><span>Rate ${x.a.rate?x.a.rate.toFixed(1)+'%':'~0%'}</span><span>Interest paid ${inr(x.a.ip)} of ${inr(x.a.ti)}</span></div></div>`).join('')||'<div class="row mu">No active loans.</div>'}</div>
+<h2>Payoff timeline</h2><div class="c">${ends.map(x=>{br-=x.l.emi;return `<div class="row"><span><b>${mon(x.a.end)}</b><br><span class="mu">${x.l.lender} closes · frees ${inr(x.l.emi)}/mo</span></span><span style="text-align:right"><b>${inr(br)}</b><br><span class="mu">EMI/mo after</span></span></div>`}).join('')||'<div class="row mu">Nothing pending.</div>'}</div>
+<button class="pri" data-a="pp" style="width:100%;padding:13px">Print report</button>`}
+function allL(){return `${lstat()}${chips()}<div class="seg"><button class="${VM=='list'?'on':''}" data-a="vm" data-v="list">List</button><button class="${VM=='detail'?'on':''}" data-a="vm" data-v="detail">Detail</button></div>${VM=='list'?`<div class="c">${srt().map(mini).join('')||'<div class="row mu">No loans yet. Tap Add to create one.</div>'}</div>`:srt().map(card).join('')}`}
+function loans(){return `<div class="r"><h1>All loans</h1><button class="pri" data-a="new">+ Add loan</button></div>${allL()}`}
+function addv(){const f=F||{lender:'',principal:'',emi:'',n:'',first:'',rate:'',paid:0};
+const i=(id,lb,t='text')=>`<div class="fr"><label>${lb}</label><input id="f_${id}" type="${t}" value="${f[id]??''}" ${t=='number'?'step="any" inputmode="decimal"':''}></div>`;
+return `<h1>${ed?'Edit loan':'Add loan'}</h1><div class="c">${i('lender','Lender')}${i('principal','Loan amount (₹)','number')}${i('emi','EMI amount (₹)','number')}${i('n','Total EMIs','number')}${i('first','First EMI date','date')}${i('rate','Interest % (optional)','number')}${i('paid','EMIs already paid','number')}</div>
+<div class="r" style="margin-top:16px"><button class="pri" data-a="save" style="flex:1;padding:13px">${ed?'Save changes':'Add loan'}</button><button data-a="cancel" style="padding:13px 20px">Cancel</button></div>`}
+function sett(){return `<h1>Settings</h1>
+<div class="c p"><b>Appearance</b><div class="seg" style="margin:10px 0 0">${[['auto','System'],['light','Light'],['dark','Dark']].map(t=>`<button class="${TH==t[0]?'on':''}" data-a="th" data-t="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+<div class="c p"><b>Auto-scan PDFs</b><p class="mu" style="margin:4px 0 0">Choose sanction letters, KFS or repayment schedules. The app reads the text and fills in loan details for you to review. Scanned image PDFs can't be read.</p>
+<input type="file" accept="application/pdf" multiple onchange="scan(this.files)"><div id="sc" class="mu"></div></div>
+${D.length?`<div class="c">${D.map((d,i)=>`<div class="row"><span><b>${d.lender}</b><br><span class="mu">${d.principal?inr(d.principal):'amount ?'} · EMI ${d.emi?inr(d.emi):'?'} · ${d.n||'?'} mo</span></span><button data-a="rev" data-id="${i}">Review</button></div>`).join('')}</div>`:''}
+<div class="c p"><b>Import file</b><p class="mu" style="margin:4px 0 0">JSON backup or CSV (columns: lender,principal,emi,n,first,rate,paid).</p><input type="file" accept=".json,.csv,text/csv,application/json" onchange="imp(this.files[0])"></div>
+${gcard()}<div class="c"><div class="row"><span>Export backup</span><button data-a="exp">Export JSON</button></div><div class="row"><span>Delete all loans</span><button class="t d" data-a="clr">Delete all</button></div></div>`}
+function render(){autoPaid();$('#app').innerHTML={home,loans,daily,dadd,cal,ins,add:addv,print:prt,set:sett,bot,eprint:eprt,sched:sch,prh}[V]();const n=alerts().length;$('#nv').innerHTML=[['home','Home'],['loans','All loans'],['daily','Daily'],['cal','Calendar'],['ins','Insights'],['bot','Sanhubai'],['prh','Print'],['set','Settings']].map(a=>`<button class="${V==a[0]||(V=='add'&&a[0]=='loans')||(V=='dadd'&&a[0]=='daily')||(V=='print'&&a[0]=='ins')||(V=='sched'&&a[0]=='loans')||(V=='rp'&&a[0]=='prh')||(V=='eprint'&&a[0]=='bot')?'on':''}" onclick="go('${a[0]}')"><svg viewBox="0 0 24 24">${IC[a[0]]}</svg>${a[1]}${a[0]=='home'&&n?`<i>${n}</i>`:''}</button>`).join('')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||/^(dl|gh|rx|fx)_/.test(b.dataset.a))return;const a=b.dataset.a,id=+b.dataset.id,l=L.find(x=>x.id==id);
+if(a=='pay'&&l&&l.paid<l.n)l.paid++;else if(a=='undo'&&l&&l.paid>0){l.paid--;l.ac=pc(l)}
+else if(a=='del'){if(l&&confirm('Delete '+l.lender+'?'))L=L.filter(x=>x.id!=id);else return}
+else if(a=='edit'){F={...l};ed=id;V='add'}
+else if(a=='sd'){const n=+b.dataset.s;SD=SD==n?null:n}else if(a=='cm'){CD=new Date(CD.getFullYear(),CD.getMonth()+ +b.dataset.d,1);SD=null}else if(a=='new'){go('add');return}
+else if(a=='sf')SF=b.dataset.f;else if(a=='pp'){go('print');return}
+else if(a=='vm')VM=b.dataset.v;else if(a=='prt'){try{window.print()}catch(e){toast('Use browser menu to print')}return}
+else if(a=='th'){TH=b.dataset.t;document.documentElement.dataset.theme=TH;try{localStorage.setItem('loantracker_theme',TH)}catch(e){}}
+else if(a=='uf')UF=+b.dataset.u;else if(a=='sv')SV=b.dataset.v;else if(a=='hx')HX=!HX;
+else if(a=='wa'){window.open('https://wa.me/?text='+encodeURIComponent(upTxt()),'_blank');return}
+else if(a=='ep'){go('eprint');return}else if(a=='bk'){go('bot');return}
+else if(a=='ask'||a=='aq'){ask(a=='aq'?SQ[+b.dataset.i]:$('#q').value);return}
+else if(a=='cancel'){go('loans');return}
+else if(a=='rev'){F=D[id];D.splice(id,1);ed=null;V='add'}
+else if(a=='save'){const g=k=>$('#f_'+k).value,o={lender:g('lender').trim(),principal:+g('principal'),emi:+g('emi'),n:+g('n'),first:g('first'),rate:+g('rate')||0,paid:+g('paid')||0};
+if(!o.lender||!o.emi||!o.n||!o.first){toast('Lender, EMI, total EMIs aur first due date bharo');return}
+if(ed)Object.assign(L.find(x=>x.id==ed),o);else L.push({id:Date.now(),...o});toast(ed?'Changes saved':'Loan added');save();go('loans');return}
+else if(a=='exp'){const u=URL.createObjectURL(new Blob([JSON.stringify({loans:L,daily:DL},null,1)],{type:'application/json'})),x=document.createElement('a');x.href=u;x.download='loans.json';x.click();return}
+else if(a=='clr'){if(confirm('Saare loans delete karne hain?'))L=[];else return}
+save();render()});
+async function scan(fs){const s=$('#sc');for(const f of fs){try{s.textContent='Scanning '+f.name+'…';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const p=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let t='';
+for(let i=1;i<=Math.min(p.numPages,6);i++){const c=await(await p.getPage(i)).getTextContent();t+=c.items.map(x=>x.str).join(' ')+' '}
+if(t.trim().length<30)throw 0;D.push(parse(t,f.name))}catch(e){toast('Scan failed: '+f.name)}}
+render();toast(D.length?'Scan done — review & add karo':'Kuch nahi mila')}
+function parse(t,nm){const u=t.toUpperCase(),n=r=>{const m=t.match(r);return m?Math.round(+m[1].replace(/,/g,'')):0};
+const rt=t.match(/(?:interest|rate|ROI)[^%]{0,60}?(\d+(?:\.\d+)?)\s*%/i),dt=t.match(/(\d{2})[\/-](\d{2})[\/-](20\d\d)/),iso=t.match(/(20\d\d)-(\d{2})-(\d{2})/);
+return{lender:(LND.find(x=>u.includes(x[0]))||[0,nm.replace(/\.pdf$/i,'')])[1],
+principal:n(/(?:Sanctioned Loan amount|Loan Amount|Amount Financed|Principal Amount)[^0-9]{0,40}([\d,]{4,})/i),
+emi:n(/(?:EMI Amount|Amount of EMI Payable|EPI[^0-9]{0,12}|Installment)[^0-9]{0,15}([\d,]{3,})/i),
+n:n(/(?:tenure|loan term|term)[^0-9]{0,40}(\d{1,3})/i),first:dt?`${dt[3]}-${dt[2]}-${dt[1]}`:iso?iso[0]:'',rate:rt?+rt[1]:0,paid:0}}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{let a;const t=r.result;
+if(f.name.endsWith('.csv')){const ls=t.trim().split(/\r?\n/),h=ls[0].split(',').map(x=>x.trim());a=ls.slice(1).map(x=>{const v=x.split(','),o={};h.forEach((k,i)=>o[k]=v[i]);return o})}
+else{const j=JSON.parse(t);if(j.daily){DL=j.daily;dsave()}a=j.loans||j}
+let c=0;a.forEach(o=>{if(o.lender&&o.emi&&o.n&&o.first){L.push({id:Date.now()+c++,lender:o.lender,principal:+o.principal||0,emi:+o.emi,n:+o.n,first:o.first,rate:+o.rate||0,paid:+o.paid||0})}});
+save();render();toast(c+' loans imported')}catch(e){toast('File format sahi nahi hai')}};r.readAsText(f)}
+/* Sanhubai – offline loan advisor (no network, rule based on L data) */
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])),Bo=s=>'<b>'+s+'</b>',NL=a=>a.map((s,i)=>(i+1)+'. '+s).join('<br>');
+const SQ=['Daily loans kitne din mein khatam honge?','Daily loans kaise khatam karun?','Sabse mehnga daily loan kaun sa hai?','Roz 500 jama karun to 2 mahine mein loan close ho jayega?','Kam principal aur zyada EMI wale loans kaun se hain?','Month ka EMI 30000 rakhna hai, kaun se loan band karun?','EMI 30000 kam karni hai, kaun se pre-close karun?','Daily loans ka aaj kitna payable hai?','Har mahine 5000 side rakhun to loan kab khatam hoga?','12 mahine mein loan free hone ke liye kitna side rakhun?','Kaun sa loan sabse pehle khatam karun?','Sabse jyada interest kis loan mein?','Month ka EMI kaise kam karun?','Loan-free kab honge?','Mere paas 20000 hain, kahan lagaun?','Konsa EMI sabse bada hai?','Jaldi loan free hone ke idea do','Agli EMI kab hai?'];
+let CH=[{b:1,t:'Namaste! Main '+Bo('Sanhubai')+' hoon 🙏<br>Aapke loan data se bataungi: kaun sa EMI jaldi khatam karein, kahan interest jyada hai, aur loan-free kaise hon. Sab offline, net nahi chahiye.'}];
+function ask(v){v=(v||'').trim();if(!v)return;const m={b:1,t:'<span class="mu">🧠 Soch rahi hoon…</span>'};CH.push({b:0,t:esc(v)},m);render();scrollTo(0,1e6);const i=$('#q');if(i)i.focus({preventScroll:true});setTimeout(()=>{try{m.t=brain(v)}catch(e){m.t='Kuch gadbad ho gayi, dobara try karo.';showErr('Sanhubai: '+e.message)}if(V=='bot')render();scrollTo(0,1e6)},650)}
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.id=='q')ask(e.target.value)});
+let UF=30;
+const upc=()=>L.filter(act).map(l=>({l,d:nxt(l),n:days(l)})).filter(x=>UF==0||x.n<=UF).sort((a,b)=>a.d-b.d),UL=()=>UF?'Agle '+UF+' din':'Saare active loans (agli EMI)';
+function upTxt(){const u=upc();return '📅 *Upcoming EMI list*\n'+UL()+' · '+fd(new Date())+'\n\n'+(u.map((x,i)=>(i+1)+'. *'+x.l.lender+'* — '+inr(x.l.emi)+' — '+fd(x.d)+' ('+when(x.n)+')').join('\n')||'Koi EMI due nahi.')+'\n\n*Total: '+inr(sum(u,x=>x.l.emi))+'*'}
+function upCard(){const u=upc();return `<div class="c"><div class="row"><b>Upcoming EMI dates</b><b class="emi">${inr(sum(u,x=>x.l.emi))}</b></div><div style="padding:0 16px 10px"><div class="seg" style="margin:0">${[[7,'7 din'],[30,'30 din'],[0,'Sabhi']].map(o=>`<button class="${UF==o[0]?'on':''}" data-a="uf" data-u="${o[0]}">${o[1]}</button>`).join('')}</div></div>${u.map(x=>`<div class="row"><span class="r" style="justify-content:flex-start"><span class="dot" style="background:${clr(x.n)}"></span><span><b>${x.l.lender}</b><br><span class="mu" style="color:${clr(x.n)}">${fd(x.d)} · ${when(x.n)}</span></span></span><b class="emi">${inr(x.l.emi)}</b></div>`).join('')||'<div class="row mu">Is range mein koi EMI due nahi.</div>'}<div class="row"><button class="pri" data-a="wa" style="flex:1;padding:11px">WhatsApp pe bhejo</button><button data-a="ep" style="flex:1;padding:11px">Print preview</button></div></div>`}
+function eprt(){const u=upc();return `<h1 class="noprint">Print preview</h1><div class="noprint r" style="margin-bottom:14px;gap:8px"><button class="pri" data-a="prt" style="flex:1;padding:13px">Print / Save as PDF</button><button data-a="bk" style="padding:13px 20px">Back</button></div>
+<div class="sheet"><div class="r" style="align-items:flex-start"><div><div style="font-size:21px;font-weight:700">Upcoming EMI list</div><div class="mu">${UL()} · Printed on ${fd(new Date())}</div></div><div style="text-align:right"><div class="mu">Total</div><div style="font-size:21px;font-weight:700">${inr(sum(u,x=>x.l.emi))}</div></div></div>
+<div class="tw" style="margin-top:14px"><table style="min-width:0"><thead><tr><th>#</th><th>Finance / Lender</th><th>Due date</th><th>EMI no.</th><th class="n">EMI amount</th><th>Status</th></tr></thead><tbody>${u.map((x,i)=>`<tr><td>${i+1}</td><td><b>${x.l.lender}</b></td><td>${fd(x.d)}</td><td>${x.l.paid+1} of ${x.l.n}</td><td class="n"><b>${inr(x.l.emi)}</b></td><td>${when(x.n)}</td></tr>`).join('')}</tbody><tfoot><tr><td></td><td>Total</td><td></td><td></td><td class="n">${inr(sum(u,x=>x.l.emi))}</td><td></td></tr></tfoot></table></div></div>`}
+function bot(){return `<h1>Sanhubai</h1><div class="mu" style="margin:-8px 16px 14px">Offline salahkar · aapke loan data se</div>${upCard()}<h2>Sanhubai se poochho</h2><div>${CH.map(m=>`<div class="bb ${m.b?'bt':'us'}">${m.t}</div>`).join('')}</div><div class="chips" style="margin-top:12px">${SQ.map((q,i)=>`<button data-a="aq" data-i="${i}">${q}</button>`).join('')}</div><div class="qb"><input id="q" list="ql" placeholder="Sawal likho…" autocomplete="off"><datalist id="ql">${(UQ=UQ||QL()).map(q=>`<option value="${q}">`).join('')}</datalist><button class="pri" data-a="ask">Bhejo</button></div>`}
+const FQ=[[/foreclos|pre.?close/,'Foreclosure = loan time se pehle poora chuka dena. Kai lenders 2–5% + GST lete hain (floating-rate personal loan par individual ko aksar charge nahi lagta). Band karne ke baad NOC/closure letter lo aur CIBIL mein "Closed" check karo.'],[/part.?pre.?pay/,'Part-prepayment = beech mein thoda principal chuka dena. Isse EMI ya tenure kam hota hai. Kuch lenders (jaise aapka SMFG letter) allow nahi karte, pehle poochho.'],[/snowball|avalanche/,'Avalanche = sabse mehnge rate wala loan pehle (interest sabse kam). Snowball = sabse chhota balance pehle (EMI jaldi free). Interest bachana ho to avalanche, month ka bojh jaldi kam karna ho to snowball.'],[/cibil|credit score/,'Time par EMI bharne se score badhta hai. Late/bounce, settlement aur bahut saare naye loans se girta hai.'],[/late fee|bounce|miss/,'EMI miss karne par late fee + penal interest + bounce charge (aksar ₹400-600) lagta hai aur CIBIL girta hai. Due date se 1-2 din pehle account mein paisa rakho.'],[/balance transfer|consolidat/,'Balance transfer/consolidation = mehnge loans ko ek sasti rate wale loan se chukana. Fayda tabhi jab nayi rate kaafi kam ho aur processing fee + foreclosure charge ke baad bhi bachat ho.'],[/processing fee/,'Processing fee loan lete waqt ek baar katti hai (aksar 1–5% + GST), refund nahi hoti. Baar-baar naya loan lena isliye mehnga padta hai.'],[/\bnoc\b|closure letter/,'NOC loan poora chukane ka lender ka proof hai. Close hone ke 30 din ke andar lo aur CIBIL mein status check karo.'],[/settlement/,'Settlement = kam paisa dekar loan band karna. CIBIL mein "Settled" likha jata hai, jo future loan par bura asar daalta hai. Last option rakho.'],[/reducing balance|emi kya/,'EMI mein har mahine ka interest + principal hota hai. Reducing balance mein interest sirf baaki principal par lagta hai, isliye shuru mein interest zyada aur baad mein principal zyada kat-ta hai.'],[/emergency fund/,'Pehle 1–2 mahine ki EMI + kharch ka emergency fund rakho, phir baaki extra paisa loan mein lagao. Warna naye loan lene pad sakte hain.'],[/foir|income ratio/,'Thumb rule: saari EMI income ki 40-50% se upar na ho. Zyada ho to naya loan na lo aur pehle ek-do loan band karo.'],[/tenure/,'Tenure badhane se EMI kam hoti hai par total interest badhta hai. Ise last option rakho.'],[/bnpl|credit card/,'Credit card/BNPL ka bill poora time par bharo. Minimum due par chhodne se 36-48% saalana interest lagta hai.']];
+let UQ=null;
+const GQ=['Kaun sa loan sabse pehle khatam karun?','Sabse zyada interest kis loan mein?','Sabse kam interest kis loan mein?','Month ka EMI kaise kam karun?','Loan-free kab honge?','Konsa EMI sabse bada hai?','Konsa EMI sabse chhota hai?','Agli EMI kab hai?','Kitna loan baaki hai?','Sabse mehnga rate kis loan ka hai?','Sabse lamba loan kaun sa hai?','Sabse zyada baaki principal kis loan mein?','Ab tak kitna interest diya?','Jaldi loan free hone ke idea do','Avalanche aur snowball kya hota hai?','Foreclosure kya hota hai?','Part prepayment kya hota hai?','CIBIL score par kya asar padta hai?','Balance transfer kya hai?','EMI bounce hone par kya hota hai?','Loan kam karne ke liye kitna paisa side rakhun?','Kitne mahine mein sab loan khatam honge?','Abhi sab loan band karne ke liye kitna chahiye?','Emergency fund kitna rakhun?','Settlement kya hota hai?'];
+function QL(){const o=[],T=['ki EMI kitni hai?','kab khatam hoga?','mein kitna interest baaki hai?','ka rate kitna hai?','poora band karne mein kitna lagega?','mein har mahine 2000 extra dalun to?','mein har mahine 5000 extra dalun to?','mein kitni EMI baaki hai?'];L.filter(act).forEach(l=>T.forEach(q=>o.push(l.lender+' '+q)));[1000,2000,3000,5000,7000,10000,15000,20000,25000,30000].forEach(e=>o.push('Har mahine '+e+' side rakhun to loan kab khatam hoga?'));[5000,10000,20000,30000,50000,100000].forEach(v=>o.push('Mere paas '+v+' hain, kahan lagaun?'));[6,9,12,15,18,24,36].forEach(n=>o.push(n+' mahine mein loan free hone ke liye kitna side rakhun?'));return o.concat(GQ)}
+const mdate=m=>mon(new Date(today().getFullYear(),today().getMonth()+m,1));
+function sim(ex,roll,only){const S=L.filter(act).map(l=>{const a=an(l);return{l,b:a.bal||left(l),i:a.bal?a.rate/1200:0,e:l.emi,c:0,r:a.rate}}).filter(s=>!only||s.l.id==only);let m=0,ti=0;const cl=[];
+while(S.some(s=>s.b>.5)&&m<600){m++;let pool=ex;
+S.forEach(s=>{if(s.b<=.5){if(roll)pool+=s.e;return}const it=s.b*s.i;ti+=it;s.b+=it;const p=Math.min(s.e,s.b);s.b-=p;if(roll)pool+=s.e-p;if(s.b<=.5&&!s.c){s.c=1;cl.push({l:s.l,m})}});
+S.filter(s=>s.b>.5).sort((p,q)=>q.r-p.r).forEach(s=>{const p=Math.min(pool,s.b);s.b-=p;pool-=p;if(s.b<=.5&&!s.c){s.c=1;cl.push({l:s.l,m})}})}
+return{m,ti,cl}}
+function simTxt(ex){const b=sim(0,false),a=sim(ex,false),c=sim(ex,true);return `Har mahine ${Bo(inr(ex))} side rakhne par:<br>• Abhi ke hisaab se: ${b.m} mahine (${mdate(b.m)})<br>• Sirf ${inr(ex)} extra: ${Bo(a.m+' mahine')} (${mdate(a.m)}), ${inr(b.ti-a.ti)} interest bachega<br>• Khatam hui EMI bhi saath daalte jao: ${Bo(c.m+' mahine')} (${mdate(c.m)}), ${inr(b.ti-c.ti)} interest bachega<br><br>Band hone ka order:<br>`+NL(c.cl.slice(0,5).map(x=>`Mahina ${x.m} (${mdate(x.m)}): ${x.l.lender}`))+'<br><span class=mu>Extra paisa sabse mehnge rate wale loan par lagta hai. Part-prepay allowed hai ya nahi, lender se check karo.</span>'}
+function solve(T,roll){if(sim(0,roll).m<=T)return 0;let lo=0,hi=1e6;if(sim(hi,roll).m>T)return null;for(let k=0;k<30;k++){const md=(lo+hi)/2;sim(md,roll).m<=T?hi=md:lo=md}return Math.ceil(hi/100)*100}
+function needTxt(T){const b=sim(0,false),tot=sum(L.filter(act),l=>l.emi);if(b.m<=T)return `Bina extra paise ke bhi sab loan ${Bo(b.m+' mahine')} (${mdate(b.m)}) mein khatam ho jayenge, yaani ${T} mahine ke andar.`;const x=solve(T,false),y=solve(T,true),f=v=>v===null?'bahut mushkil':Bo(inr(v)+'/mo');
+return `${T} mahine mein sab loan khatam karne ke liye:<br>• ${Bo('Sirf extra se')}: ${f(x)} side rakho<br>• ${Bo('Khatam hui EMI bhi agle loan mein daalo')} (abhi ki ${inr(tot)}/mo ki total payment chalu rakho): ${y===0?'koi extra nahi chahiye':f(y)+' extra'}<br>Abhi ke hisaab se ${b.m} mahine lagte.`}
+function tabTxt(){const b=sim(0,false),z=sim(0,true);return `Har mahine side rakhne ka asar:<br>`+NL([2000,5000,10000,20000].map(e=>{const a=sim(e,false),c=sim(e,true);return `${Bo(inr(e)+'/mo')} → sirf extra: ${a.m} mahine · khatam hui EMI bhi daalo: ${c.m} mahine (${inr(b.ti-c.ti)} interest bachega)`}))+`<br>Abhi: ${b.m} mahine. Bina extra ke bhi, agar khatam hui EMI agle loan mein daalte jao to ${z.m} mahine.<br>Apna amount likho, jaise "7000 side rakhun to?" ya "12 mahine mein kitna side rakhun?"`}
+function brain0(q){const t=q.toLowerCase(),has=r=>r.test(t),X=L.filter(act).map(l=>{const a=an(l);return{l,a,b:Math.max(a.bal||left(l),1)}}),Y=L.map(l=>({l,a:an(l)}));
+if(has(/^(hi|hello|hey|namaste|namaskar)/))return 'Namaste! Niche ke sawal try karo ya apna sawal likho 🙂';
+{const A=DL.filter(dact),dn=A.find(l=>t.includes(l.lender.toLowerCase().split(/[ (]/)[0]));if(A.length&&!(/\d/.test(t)&&has(/jama|side|bachat|save|daal|dal[ou]|lagaun|bhar|invest|close|band|khatam|clear/))&&(dn||has(/daily|\broz\b|rozana|per day|din ka/)))return dailyAns(t,A,dn)}
+if(!X.length)return 'Abhi koi active loan nahi hai 🎉';
+const fq=has(/kya|matlab|meaning|explain|samjha|hota|hoti|fayda|nuksan|difference|farak|\bvs\b/)&&FQ.find(f=>f[0].test(t));if(fq)return fq[1];
+const E=X.slice().sort((p,q)=>p.a.end-q.a.end),by=f=>X.slice().sort((p,q)=>f(q)-f(p)),rel=x=>x.l.emi/x.b,rt=a=>a.rate?a.rate.toFixed(1)+'%':'~0%';
+const t2=t.replace(/\d+(?:\.\d+)?\s*(saal|sal|years?|yr|mahine|mahina|maheene|months?|mahino)/g,' '),tm=t.match(/(\d+(?:\.\d+)?)\s*(saal|sal|years?|yr)/),tn=t.match(/(\d+)\s*(mahine|mahina|maheene|months?|mahino)/),T=tm?Math.round(tm[1]*12):tn?+tn[1]:0;
+const m=t2.match(/(\d[\d,]*(?:\.\d+)?)(?:\s*(k|hazar|hajar|lakh|lac)\b)?/),amt=m?parseFloat(m[1].replace(/,/g,''))*({k:1e3,hazar:1e3,hajar:1e3,lakh:1e5,lac:1e5}[m[2]]||1):0;
+const nl=L.filter(l=>{const w=l.lender.toLowerCase().split(/[\s(\/]/)[0];return w.length>2&&t.includes(w)}),mw=has(/har\s*(mahine|month|mahina)|monthly|per month|every month|prati/),sd=has(/side|extra|bachat|jama|save|rakh|daal|dal[ou]|lagaun|bhar|alag|kitna paisa/);
+{const dd=has(/\bdaily\b|\broz\b|rozana|per day|\/\s*day|har din|prati din|din ka/)&&has(/jama|side|bachat|save|daal|dal[ou]|lagaun|bhar|rakh|invest|deposit/)&&has(/close|band|khatam|free|clear|chuk|pay/);
+if(dd&&(amt>=10||T)){const w=l=>{const k=l.lender.toLowerCase().split(/[\s(\/]/)[0];return k.length>2&&t.includes(k)};return dayTxt(amt>=10?amt:0,T,L.filter(l=>act(l)&&w(l)),DL.filter(l=>dact(l)&&w(l)))}}
+{const ru=has(/emi/);if(ru&&!amt&&has(/jyada|zyada|jada|zada|bada|high/)&&has(/principal|principle|baaki|bacha|bcha|chhota|chota|kam/))return lowTxt();
+if(ru&&amt>=1000&&!has(/paas/)&&has(/band|close|pre.?close|kam|ghat|rakh|hata|reduce|khatam|free|limit|\btak\b/))return planTxt(has(/rakh|\btak\b|limit|target|rahe|andar|hona|neeche|maximum|\bmax/)?'target':'reduce',amt)}
+if(amt>=500&&mw&&(sd||nl.length||has(/khatam|free|kab|kam/))){if(nl.length){const l=nl[0];if(!act(l))return l.lender+' pehle se closed hai ✓';const b=sim(0,false,l.id),p=sim(amt,false,l.id);return `${Bo(l.lender)} mein har mahine ${inr(amt)} extra dalne par:<br>• Abhi: ${b.m} mahine (${mdate(b.m)})<br>• Extra ke baad: ${Bo(p.m+' mahine')} (${mdate(p.m)}), yaani ${b.m-p.m} mahine jaldi<br>• Interest bachega: ${inr(b.ti-p.ti)}<br><span class=mu>Part-prepay allowed hai ya nahi, lender se check karo.</span>`}return simTxt(amt)}
+if(T&&has(/side|extra|rakh|jama|save|bachat|khatam|free|close|band|kitna/)&&!(amt>=1000&&has(/paas|hain/)))return needTxt(T);
+if(!amt&&sd&&has(/kitna|kaise|kya|karun|rakhun|chahiye/))return tabTxt();
+if(amt>=1000&&has(/paas|hain|hai|extra|bonus|mil|prepay|lagaun|daalu|dalu|bacha|salary|invest/)){const c=X.filter(x=>x.b<=amt);
+if(c.length){const bt=budTxt(amt);if(bt)return bt}
+const h=by(x=>x.a.rate)[0],n=by(x=>-x.b)[0];
+return `${inr(amt)} se koi poora loan band nahi hoga. Sabse chhota baaki ${Bo(n.l.lender)} (${inr(n.b)}) hai — ${inr(n.b-amt)} aur jod lo to band, EMI ${inr(n.l.emi)}/mo free.<br>Ya part-prepay sabse mehnge rate wale ${Bo(h.l.lender)} (${rt(h.a)}) mein karo, pehle lender se confirm karo ki part-prepayment allowed hai.`}
+if(nl.length)return nl.slice(0,3).map(l=>{const a=an(l);return `${Bo(l.lender)}<br>EMI ${inr(l.emi)}/mo · ${act(l)?ml(l)+' mahine baaki, '+mon(a.end)+' mein khatam':'Closed ✓'}<br>Rate ~${rt(a)} · Baaki principal ${inr(a.bal)}<br>Interest: ${inr(a.ip)} diya, ${inr(a.il)} baaki (total ${inr(a.ti)})<br>Abhi poora band karna ho to approx ${inr(a.bal)} (fees alag)`}).join('<br><br>');
+if(has(/kab|when|date|tareekh/)&&has(/free|khatam|close|puri|debt|saare|sab/))return `Saare loans ${Bo(mon(E[E.length-1].a.end))} tak khatam honge (${E[E.length-1].a.ml} mahine), agar sab EMI time par bharo.<br><br>EMI kab-kab ghategi:<br>`+NL(E.slice(0,4).map(x=>`${mon(x.a.end)} — ${x.l.lender} band, EMI ${inr(x.l.emi)}/mo free`));
+if(has(/emi/)&&has(/sabse|highest|lowest|konsa|kaun|which|ranking|list/)&&has(/high|low|jyada|zyada|bada|badi|chhota|choti|chota|amt|amount|kam/)&&!has(/khatam|close|band|jaldi|relief|load|bojh|kaise|pehle/)){const r=by(x=>x.l.emi);
+return `EMI ke hisaab se (bade se chhota):<br>`+NL(r.map(x=>`${Bo(inr(x.l.emi))} — ${x.l.lender} <span class=mu>(${x.a.ml} mo baaki)</span>`))+`<br><br>Sabse bada: ${Bo(r[0].l.lender)} · sabse chhota: ${Bo(r[r.length-1].l.lender)}`}
+if(has(/interest|byaj|vyaj|sood|rate|charge|mehnga|mehenga|costly|sasta/)){const s=Y.filter(y=>y.a.ti>0).sort((p,q)=>q.a.ti-p.a.ti),g=by(x=>x.a.rate)[0],f=y=>`${Bo(y.l.lender)} — ${inr(y.a.ti)} (rate ${rt(y.a)}, ${inr(y.a.il)} baaki)`;
+if(!s.length)return 'Interest nikalne ke liye loan amount bharo.';
+return `${Bo('Sabse zyada interest')}:<br>`+NL(s.slice(0,3).map(f))+`<br><br>${Bo('Sabse kam interest')}:<br>`+NL(s.slice(-2).reverse().map(f))+`<br><br>Sabse mehnga rate: ${Bo(g.l.lender)} ${rt(g.a)}. Extra paisa aaye to pehle isse band karo.`}
+if(has(/due|agli|next|bharna|alert|aaj|is mahine|upcoming/)){const d=X.slice().sort((p,q)=>nxt(p.l)-nxt(q.l));return `${Bo('Agli EMI')}:<br>`+NL(d.slice(0,5).map(x=>`${Bo(x.l.lender)} — ${inr(x.l.emi)} · ${when(days(x.l))}`))+`<br><br>Agle 30 din mein total ${Bo(inr(sum(d.filter(x=>days(x.l)<=30),x=>x.l.emi)))} jayega.`}
+if(has(/idea|tip|plan|strategy|salah|suggest|tarika|trick|free hone/)){const hr=by(x=>x.a.rate)[0],rl=by(rel).filter(x=>x.a.ml>3)[0],nx=E[0];
+return `${Bo('Jaldi loan-free hone ke idea')}:<br>`+NL([`Mehnge rate wala loan pehle band karo: ${Bo(hr.l.lender)} (${rt(hr.a)}). Isse interest sabse zyada bachta hai.`,rl?`Month ka bojh kam karna ho to ${Bo(rl.l.lender)} prepay karo: ${inr(rl.b)} mein EMI ${inr(rl.l.emi)}/mo free.`:'',`${Bo(nx.l.lender)} ${mon(nx.a.end)} mein khud band hoga. Uski EMI free hote hi next loan ke prepay mein daalo.`,'Naya loan/BNPL mat lo, EMI time par bharo. Late fee aur CIBIL dono bachenge.','Bonus ya refund mile to ek chhota loan poora band karo, thoda-thoda sabme mat baanto.',hr.a.rate>24?`Rate ${Math.round(hr.a.rate)}% se upar hai. Sasti rate par balance transfer / consolidation ka option pooch sakte ho.`:'',L.some(l=>/smfg/i.test(l.lender))?'SMFG letter mein part-prepayment allowed nahi aur foreclosure 3% + tax hai, pehle fees dekh lo.':'','Foreclosure fee aur part-prepay rule har lender ka alag hota hai, band karne se pehle pooch lo.'].filter(Boolean))+'<br><span class=mu>Ye sirf aapke data par approx calculation hai, financial salah nahi.</span>'}
+if(has(/khatam|close|band|pehle|first|jaldi|relief|load|bojh|clear|chukao/)||has(/emi.*(kam|ghat)|(kam|ghat).*emi/)){const r=by(rel).filter(x=>x.a.ml>3).slice(0,3),sn=X.filter(x=>x.a.ml<=3);
+return (r.length?`${Bo('Prepay ke liye best')} (har ₹ par sabse zyada EMI relief):<br>`+NL(r.map(x=>`${Bo(x.l.lender)} — ${inr(x.b)} dekar EMI ${inr(x.l.emi)}/mo kam, ${inr(x.a.il)} interest bachega, ${x.a.ml} mahine baaki`)):'')+(sn.length?`<br><br>${Bo('Ye khud jaldi khatam honge')} (inpar extra paisa mat lagao):<br>`+NL(sn.map(x=>`${x.l.lender} — ${x.a.ml} mahine, phir EMI ${inr(x.l.emi)}/mo free`)):'')+'<br><br>Tip: loan khatam hote hi uski EMI agle loan ke prepay mein daalte jao, chain se sab jaldi band honge.'}
+const MT=[[/interest.*(diya|paid|chuka|ab tak)/,'Ab tak diya interest',x=>x.a.ip,inr],[/interest.*(baaki|bacha|left|aage)/,'Baaki interest',x=>x.a.il,inr],[/(mahine|month|lamba|tenure|kab)/,'Mahine baaki',x=>x.a.ml,v=>Math.round(v)+' mo'],[/(emi|kist)/,'EMI',x=>x.l.emi,inr],[/(baaki|outstanding|bacha|balance|principal)/,'Baaki principal',x=>x.b,inr],[/(rate|%|percent)/,'Rate',x=>x.a.rate,v=>v.toFixed(1)+'%'],[/(liya|borrow|loan amount)/,'Loan amount',x=>x.l.principal||0,inr]],mt=MT.find(r=>r[0].test(t));
+if(mt&&has(/sabse|konsa|kaun|which|most|highest|lowest|max|min/)){const lo=has(/kam|chhota|choti|chota|least|lowest|min|neeche/),r=by(mt[2]);if(lo)r.reverse();return `${Bo(mt[1])} — ${lo?'sabse kam':'sabse zyada'}:<br>`+NL(r.slice(0,3).map(x=>`${Bo(x.l.lender)} — ${mt[3](mt[2](x))}`))}
+if(has(/summary|total|kitna|baaki|remaining|overview|status|hisab/))return `Active loans: ${Bo(X.length)} · Monthly EMI ${Bo(inr(sum(X,x=>x.l.emi)))}<br>Baaki payment ${inr(sum(X,x=>left(x.l)))} (isme interest ${inr(sum(X,x=>x.a.il))})<br>Loan-free: ${Bo(mon(E[E.length-1].a.end))}`+(DL.some(dact)?'<br><br>'+dtxt(DL.filter(dact)):'');
+return 'Ye samajh nahi aaya 😅 Aise poochho:<br>• Kaun sa loan pehle khatam karun?<br>• Sabse zyada interest kis mein?<br>• Mere paas 15000 hain, kahan lagaun?<br>• Navi ka detail batao'}
+/* ===== Daily-interest (bullet) loans — separate category ===== */
+const K2='loantracker_daily';
+const DS=[['ScaleUp (PayMe)',30000,22920,.15,'2026-09-25','2026-10-30',35,31575,0,3000],['R.K Bansal (RamFincorp)',16246,15007,.6,'2026-09-04','2026-10-06',32,19365,.1,590],['Paisaboxx (Sawalsha)',17000,14448,1,'2026-09-25','2026-11-06',42,24140,1.25,0],['Salary112 (SR Capital)',23000,20286,1,'2026-09-26','2026-10-16',20,27600,1,0],['Rupeeontime (Vrinda)',9000,7938,1,'2026-08-01','2026-09-15',45,13050,1,0],['EmergencyPaisa (Suburban)',14500,12789,1,'2026-09-08','2026-10-08',30,18850,2,0],['TezCredit (Finagle)',9000,7650,1,'2026-09-26','2026-11-07',42,12780,1.25,0]];
+let DL=dload(),DF=null,dEd=null;
+function dload(){let a=null;try{a=JSON.parse(localStorage.getItem(K2))}catch(e){}
+if(!Array.isArray(a)){a=DS.map((s,i)=>({id:7001+i,lender:s[0],principal:s[1],net:s[2],rate:s[3],start:s[4],due:s[5],tenure:s[6],repay:s[7],penal:s[8],once:s[9],paid:''}));try{localStorage.setItem(K2,JSON.stringify(a))}catch(e){}}return a}
+function dsave(){try{localStorage.setItem(K2,JSON.stringify(DL))}catch(e){}try{gsched()}catch(e){}}
+IC.daily='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
+const DD=s=>new Date(s+'T00:00:00'),dact=l=>!l.paid,iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function dc(l,t){t=t||today();const el=Math.round((t-DD(l.start))/864e5),d=Math.max(0,Math.min(l.tenure,el)),pd=l.principal*l.rate/100,late=Math.max(0,Math.round((t-DD(l.due))/864e5)),pen=late?l.principal*l.penal/100*late+(+l.once||0):0;
+return{d,pd,acc:pd*d,late,pen,pend:l.principal*l.penal/100,pay:late?l.repay+pen:l.principal+pd*d,left:Math.round((DD(l.due)-t)/864e5)}}
+const dtm=()=>{const t=today();return new Date(t.getFullYear(),t.getMonth(),t.getDate()+1)};
+function dsum(){const A=DL.filter(dact),X=A.map(l=>({l,c:dc(l)}));return{A,X,P:sum(X,x=>x.c.pay),G:sum(X,x=>x.c.late?x.c.pend:x.c.d<x.l.tenure?x.c.pd:0),I:sum(X,x=>x.c.acc),O:X.filter(x=>x.c.late).length}}
+function dcard(l){const c=dc(l),n=dc(l,dtm()),a=dact(l),col=!a?'var(--ok)':c.late?'var(--bad)':c.left<=3?'var(--wn)':'var(--ac)',
+tag=!a?'Paid ✓ '+fd(DD(l.paid)):c.late?c.late+(c.late==1?' din late':' din late'):c.left==0?'Aaj due hai':c.left+' din baaki';
+let cells='';for(let i=1;i<=l.tenure;i++)cells+=`<i class="${!a?'ok':i<c.d||(c.late&&i==c.d)?'f':i==c.d?'t':''}"></i>`;
+if(a)for(let i=0;i<Math.min(c.late,15);i++)cells+='<i class="x"></i>';
+const dly=c.late?c.pend:c.pd;
+return `<div class="c p"><div class="r"><b style="font-size:17px">${l.lender}</b><b style="color:${col};font-size:13px">${tag}</b></div>
+<div class="r" style="margin-top:6px;align-items:flex-end"><div><div class="big2">${a?'Aaj payable':'Total diya'}</div><div class="big" style="font-size:24px;color:${a&&c.late?'var(--bad)':'var(--tx)'}">${inr(a?c.pay:l.repay)}</div></div><div style="text-align:right"><div class="big2">Due ${fd(DD(l.due))}</div><b>${inr(l.repay)}</b></div></div>
+<div class="ds">${cells}</div>
+<div class="r mu"><span>Din <b style="color:var(--tx)">${Math.min(c.d+(c.late?0:0),l.tenure)}</b> / ${l.tenure}</span>${a?`<span>${c.late?'Penal':'Aaj ka interest'} <b class="bad">+${inr(dly)}/din</b></span>`:''}</div>
+${a?`<div class="r mu" style="margin-top:6px"><span>Interest ab tak <b style="color:var(--tx)">${inr(c.acc)}</b></span><span>Kal payable <b style="color:var(--tx)">${inr(n.pay)}</b></span></div>${c.late?`<div class="r mu" style="margin-top:6px"><span>Penalty (${c.late} din)</span><b class="bad">${inr(c.pen)}</b></div>`:''}`:''}
+<div class="r mu" style="margin-top:6px"><span>Loan amount <b style="color:var(--tx)">${inr(l.principal)}</b></span><span>Processing fee <b class="bad">${inr(fe(l))}</b></span></div><div class="r mu" style="margin-top:6px"><span>Disbursed (hath mein) <b style="color:var(--ok)">${inr(l.net)}</b></span><span>Total kharcha <b style="color:var(--tx)">${inr(l.repay-l.net)}</b></span></div>
+<div class="r mu" style="margin-top:6px"><span>Rate ${l.rate}%/din</span><span>Late penalty ${l.penal}%/din${l.once?' + '+inr(l.once):''}</span></div>
+<div class="r" style="margin-top:12px"><span>${a?`<button class="pri" data-a="dl_pay" data-id="${l.id}">Mark paid</button>`:''}</span><span>${a?'':`<button class="t" data-a="dl_undo" data-id="${l.id}">Undo</button>`}<button class="t" data-a="dl_edit" data-id="${l.id}">Edit</button><button class="t d" data-a="dl_del" data-id="${l.id}">Delete</button></span></div></div>`}
+function daily(){const s=dsum(),A=s.A.slice().sort((a,b)=>DD(a.due)-DD(b.due)),Z=DL.filter(l=>!dact(l)),nx=A.find(l=>dc(l).late==0);
+return `<div class="r"><h1>Daily loans</h1><button class="pri" data-a="dl_new">+ Add</button></div><div class="mu" style="margin:-8px 16px 14px">Roz ke hisaab se badhta interest · EMI wale loans se alag</div>${dz(false)}
+${A.length?`<div class="c"><div class="row"><span>Aaj payable (sab)</span><b style="font-size:20px">${inr(s.P)}</b></div><div class="row"><span>Roz badh raha hai</span><b class="bad">+${inr(s.G)}/din</b></div><div class="row"><span>Interest ab tak</span><b>${inr(s.I)}</b></div><div class="row"><span>Disbursed (hath mein mila)</span><b>${inr(sum(A,l=>l.net))}</b></div><div class="row"><span>Processing fees</span><b class="bad">${inr(sum(A,fe))}</b></div>${s.O?`<div class="row"><span class="bad">Overdue loans</span><b class="bad">${s.O}</b></div>`:''}${nx?`<div class="row"><span>Agla due</span><b>${nx.lender.split(' (')[0]} · ${fd(DD(nx.due))}</b></div>`:''}</div>`:''}
+${dchart()}${A.map(dcard).join('')||'<p class="mu" style="padding:0 16px">Koi active daily loan nahi.</p>'}${Z.length?`<h2>Paid / closed</h2>${Z.map(dcard).join('')}`:''}`}
+function dhome(){const s=dsum();if(!s.A.length)return '';return `<div class="c" data-a="dl_go" style="cursor:pointer"><div class="row"><b>Daily interest loans</b><span class="mu">${s.A.length} active ›</span></div><div class="row"><span>Aaj payable</span><b>${inr(s.P)}</b></div><div class="row"><span>Roz badh raha hai</span><b class="bad">+${inr(s.G)}/din</b></div>${s.O?`<div class="row"><span class="bad">Overdue</span><b class="bad">${s.O} loan</b></div>`:''}</div>`}
+function dadd(){const f=DF||{lender:'',principal:'',net:'',rate:'',start:iso(today()),due:'',tenure:'',repay:'',penal:'',once:''},i=(id,lb,t='number',x)=>`<div class="fr"><label>${lb}</label><input id="d_${id}" type="${t}" value="${f[id]??''}" ${t=='number'?'step="any" inputmode="decimal"':''} ${x?`oninput="dfx('${x}')"`:''}></div>`;if(f.fee==null&&f.principal&&f.net)f.fee=Math.max(0,f.principal-f.net);
+return `<h1>${dEd?'Edit daily loan':'Add daily loan'}</h1>${dEd?'':dz(true)}<div class="c">${i('lender','Lender','text')}${i('principal','Loan amount (₹)','number','principal')}${i('fee','Processing fee + GST (₹)','number','fee')}<div class="mu" id="d_fh" style="padding:0 16px 8px"></div>${i('net','Disbursed amount — hath mein mila (₹)','number','net')}${i('rate','Interest % per din')}${i('start','Disbursal date','date')}${i('due','Due date','date')}${i('tenure','Tenure din (optional)')}${i('repay','Due pe total ₹ (optional)')}${i('penal','Late penalty % per din')}${i('once','One-time penalty ₹')}</div><div class="r" style="margin-top:16px"><button class="pri" data-a="dl_save" style="flex:1;padding:13px">${dEd?'Save changes':'Add loan'}</button><button data-a="dl_cancel" style="padding:13px 20px">Cancel</button></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||!b.dataset.a.startsWith('dl_'))return;const k=b.dataset.a.slice(3),id=+b.dataset.id,l=DL.find(x=>x.id==id);
+if(k=='go'){go('daily');return}
+if(k=='new'){DF=null;dEd=null;V='dadd';render();scrollTo(0,0);return}
+if(k=='cancel'){DF=null;dEd=null;go('daily');return}
+if(k=='edit'&&l){DF={...l};dEd=id;V='dadd';render();scrollTo(0,0);return}
+if(k=='pay'&&l)l.paid=iso(today());else if(k=='undo'&&l)l.paid='';
+else if(k=='del'){if(l&&confirm('Delete '+l.lender+'?'))DL=DL.filter(x=>x.id!=id);else return}
+else if(k=='save'){const g=x=>$('#d_'+x).value,o={lender:g('lender').trim(),principal:+g('principal'),net:+g('net')||0,fee:+g('fee')||0,rate:+g('rate'),start:g('start'),due:g('due'),penal:+g('penal')||0,once:+g('once')||0};
+if(!o.lender||!o.principal||!o.rate||!o.start||!o.due){toast('Lender, amount, rate aur dates bharo');return}
+o.tenure=+g('tenure')||Math.round((DD(o.due)-DD(o.start))/864e5);o.repay=+g('repay')||Math.round(o.principal*(1+o.rate/100*o.tenure));o.net=o.net||(o.fee?Math.max(0,o.principal-o.fee):o.principal);o.fee=o.fee||Math.max(0,o.principal-o.net);
+const e0=DL.find(x=>x.id==dEd);if(dEd&&e0)Object.assign(e0,o);else DL.push({id:Date.now(),paid:'',...o});
+toast(dEd?'Changes saved':'Daily loan added');DF=null;dEd=null;dsave();go('daily');return}
+dsave();render()});
+const MOS=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],P2=x=>String(x).padStart(2,'0');
+function pdt(t){let m;if(m=t.match(/(20\d\d)-(\d{1,2})-(\d{1,2})/))return m[1]+'-'+P2(m[2])+'-'+P2(m[3]);
+if(m=t.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d\d)/))return m[3]+'-'+P2(m[2])+'-'+P2(m[1]);
+if(m=t.match(/(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([A-Za-z]{3})[a-z]*[\s,.\-]+(20\d\d)/)){const k=MOS.indexOf(m[2].toLowerCase());if(k>=0)return m[3]+'-'+P2(k+1)+'-'+P2(m[1])}return ''}
+function dfind(t,re){const g=new RegExp(re.source,'gi');let m;while(m=g.exec(t)){const d=pdt(t.slice(g.lastIndex,g.lastIndex+45));if(d)return d}return ''}
+const nfind=(t,re)=>{const m=t.match(re);return m?+m[1].replace(/,/g,''):0},RS='[^0-9]{0,40}?(?:rs\\.?|inr|₹)?\\s*([\\d,]+(?:\\.\\d+)?)',nre=l=>new RegExp('(?:'+l+')'+RS,'i');
+function dplus(s,n){const d=DD(s);d.setDate(d.getDate()+n);return iso(d)}
+function dparse(t,nm){t=t.replace(/\s+/g,' ');const u=t.toUpperCase(),r1=t.match(/(\d+(?:\.\d+)?)\s*%\s*(?:per day|\/\s*day|a day|p\.?d\b|daily)/i)||t.match(/(?:per day|daily)(?: interest| rate)?[^0-9%]{0,30}(\d+(?:\.\d+)?)\s*%/i),pn=t.match(/(?:penal|penalty|late payment|overdue|delay)[^%0-9]{0,60}?(\d+(?:\.\d+)?)\s*%/i);
+return{lender:(LND.find(x=>u.includes(x[0]))||[0,nm.replace(/\.[a-z0-9]+$/i,'')])[1],
+principal:nfind(t,nre('loan amount|principal(?: amount)?|sanction(?:ed)? amount|approved amount|amount (?:borrowed|financed|sanctioned)')),
+fee:nfind(t,nre('processing fee|processing charges?|service fee|admin fee|platform fee|convenience fee')),
+net:nfind(t,nre('net disburs(?:al|ed)(?: amount)?|disbursed? amount|amount disbursed|amount credited|you (?:will )?(?:receive|get)|in[- ]hand(?: amount)?')),
+repay:nfind(t,nre('total repayment(?: amount)?|repayment amount|total (?:amount )?payable|amount (?:payable|to be repaid)|total due')),
+rate:r1?+r1[1]:0,penal:pn?+pn[1]:0,once:nfind(t,nre('(?:one[- ]time|flat|fixed)\\s*(?:penalty|late(?: payment)? (?:fee|charge))')),
+tenure:nfind(t,/(?:tenure|tenor|duration|repayment period)[^0-9]{0,25}?(\d{1,3})\s*days?/i)||nfind(t,/(\d{1,3})\s*days?\s*(?:loan|tenure|tenor)/i),
+start:dfind(t,/(?:disburs(?:al|ed|ement)(?: date)?|loan date|start date|sanction date|date of (?:loan|disbursal))[^0-9A-Za-z]{0,20}/),
+due:dfind(t,/(?:due date|repayment date|pay(?:ment)? (?:date|by)|repay by|maturity date|last date)[^0-9A-Za-z]{0,20}/)}}
+function dfin(o){o={lender:String(o.lender||'').trim(),principal:+o.principal||0,net:+o.net||0,fee:+o.fee||0,rate:+o.rate||0,start:o.start||'',due:o.due||'',tenure:+o.tenure||0,repay:+o.repay||0,penal:+o.penal||0,once:+o.once||0};
+if(!o.due&&o.start&&o.tenure)o.due=dplus(o.start,o.tenure);if(!o.start&&o.due&&o.tenure)o.start=dplus(o.due,-o.tenure);
+if(!o.rate&&o.repay&&o.principal&&o.tenure)o.rate=+((o.repay-o.principal)/o.principal/o.tenure*100).toFixed(2);
+const ok=!!(o.lender&&o.principal&&o.rate&&o.start&&o.due);
+if(ok){o.tenure=o.tenure||Math.round((DD(o.due)-DD(o.start))/864e5);o.repay=o.repay||Math.round(o.principal*(1+o.rate/100*o.tenure));if(o.fee&&o.fee<=30&&o.principal>=1000)o.fee=Math.round(o.principal*o.fee/100);o.net=o.net||(o.fee?Math.max(0,o.principal-o.fee):o.principal);o.fee=o.fee||Math.max(0,o.principal-o.net)}
+return{o,ok}}
+async function ocr(f){if(!window.Tesseract)await new Promise((a,b)=>{const e=document.createElement('script');e.src='https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js';e.onload=a;e.onerror=b;document.head.appendChild(e)});return (await Tesseract.recognize(f,'eng')).data.text}
+async function ftext(f){const n=f.name.toLowerCase();
+if(/\.pdf$/.test(n)||f.type=='application/pdf'){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const p=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let t='';for(let i=1;i<=Math.min(p.numPages,8);i++){const c=await(await p.getPage(i)).getTextContent();t+=c.items.map(x=>x.str).join(' ')+' '}if(t.trim().length<30)throw 0;return t}
+if(f.type.startsWith('image/'))return ocr(f);return f.text()}
+async function fitems(f){const n=f.name.toLowerCase();
+if(/\.json$/.test(n)){const j=JSON.parse(await f.text());return (Array.isArray(j)?j:(j.daily||[])).filter(x=>x.start||x.due)}
+if(/\.csv$/.test(n)){const ls=(await f.text()).trim().split(/\r?\n/),h=ls[0].split(',').map(x=>x.trim());return ls.slice(1).map(x=>{const v=x.split(','),o={};h.forEach((k,i)=>o[k]=(v[i]||'').trim());return o})}
+return [dparse(await ftext(f),f.name)]}
+async function dscan(fs,review){fs=[...fs];if(!fs.length)return;let add=0,dup=0;const bad=[],s=$('#ds');
+for(const f of fs){try{if(s)s.textContent='Padh raha hoon: '+f.name+'…';
+for(const it of await fitems(f)){const r=dfin(it);if(r.ok&&!review){if(DL.some(x=>x.lender==r.o.lender&&x.principal==r.o.principal&&x.start==r.o.start))dup++;else DL.push({id:Date.now()+add++,paid:'',...r.o})}else bad.push(r.o)}}catch(e){toast('Padh nahi paya: '+f.name)}}
+dsave();
+if(bad.length){DF=bad[0];dEd=null;V='dadd';render();scrollTo(0,0);toast(review?'Details bhar di — check karke save karo':(add?add+' add hui. ':'')+'Baaki details bharo')}
+else{render();toast(add?add+' daily loan add hui ✓':dup?'Ye loan pehle se hai':'Kuch nahi mila')}}
+function dz(rv){return `<label class="dz"><input type="file" hidden multiple accept=".pdf,.png,.jpg,.jpeg,.csv,.json,.txt,application/pdf,image/*" onchange="dscan(this.files,${rv});this.value=''"><span class="dzi"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span><span><b>Loan file se ${rv?'details bharo':'add karo'}</b><span class="mu">PDF, screenshot, CSV ya JSON chuno. Amount, rate aur dates apne aap bhar jayengi.</span></span></label><div id="ds" class="mu"></div>`}
+
+const INC=()=>{try{return localStorage.getItem('loantracker_inc')||''}catch(e){return ''}},tm=()=>new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+const LG=a=>`<div class="lg">${a.map(x=>`<u style="--k:${x[0]}">${x[1]}</u>`).join('')}</div>`;
+const xAct=()=>L.filter(act).map(l=>{const a=an(l);return{l,a,b:Math.max(a.bal||left(l),1)}}),rt1=a=>a.rate?a.rate.toFixed(1)+'%':'~0%';
+function emiBest(R){const X=xAct(),n=X.length;
+if(n>20){const o=X.slice().sort((p,q)=>q.l.emi/q.b-p.l.emi/p.b),sel=[];let e=0;for(const x of o){if(e>=R)break;sel.push(x);e+=x.l.emi}return{sel,e,c:sum(sel,x=>x.b),il:sum(sel,x=>x.a.il),k:sel.length}}
+const sub=f=>{for(let m=1;m<(1<<n);m++){let e=0,c=0,il=0,k=0;for(let i=0;i<n;i++)if(m>>i&1){e+=X[i].l.emi;c+=X[i].b;il+=X[i].a.il;k++}if(e>=R)f(m,e,c,il,k)}};
+let mc=Infinity,best=null;sub((m,e,c)=>{if(c<mc)mc=c});sub((m,e,c,il,k)=>{if(c>mc*1.05)return;if(!best||il>best.il||(il==best.il&&k<best.k))best={m,e,c,il,k}});
+return{sel:X.filter((_,i)=>best.m>>i&1),e:best.e,c:best.c,il:best.il,k:best.k}}
+function planTxt(mode,amt){const X=xAct(),M=sum(X,x=>x.l.emi),R=mode=='target'?M-amt:amt;
+if(R<=0)return `Aapki abhi ki total EMI ${Bo(inr(M)+'/mo')} hai, jo ${inr(amt)} se pehle hi kam hai ✓`;
+const hd=mode=='target'?`Abhi total EMI ${Bo(inr(M)+'/mo')}. ${inr(amt)}/mo rakhne ke liye ${Bo(inr(R)+'/mo')} kam karni hogi.`:`${inr(amt)}/mo EMI kam karne ke liye:`;
+if(R>M)return `${hd}<br>Saare loans band karne par bhi sirf ${inr(M)}/mo hi kam hoga. Sab band karne ka total ~${inr(sum(X,x=>x.b))} lagega.`;
+const p=emiBest(R),o=p.sel.slice().sort((x,y)=>y.l.emi/y.b-x.l.emi/x.b);
+return `${hd}<br><br>🧠 ${Bo('Maine saare combinations check karke ek hi plan chuna:')}<br>`+o.map((x,i)=>`${i+1}. ${Bo(x.l.lender)} — ~${inr(x.b)} dekar EMI ${inr(x.l.emi)}/mo free (${rt1(x.a)}, ${ml(x.l)} mahine baaki)`).join('<br>')+`<br><br>Total lagega ~${Bo(inr(p.c))} · EMI ${inr(M)} → ${Bo(inr(M-p.e)+'/mo')}${mode=='target'?(M-p.e<=amt?' ✓':''):''} · interest bachega ~${inr(p.il)}<br><br>${Bo('Kyun yahi:')} ${p.k} loans band karke sabse kam paise (~${inr(p.c)}) mein ${mode=='target'?'target':'kami'} poora hota hai aur interest bhi ${inr(p.il)} bachta hai. Isi order mein band karo — har loan band hote hi EMI turant kam hogi.<br><span class=mu>Baaki principal ke hisaab se approx. Foreclosure charge/GST lender se confirm karo. Daily loans alag hain.</span>`}
+function budTxt(amt){const X=xAct(),n=X.length,M=sum(X,x=>x.l.emi);let best=null;
+if(n<=20){for(let m=1;m<(1<<n);m++){let e=0,c=0,il=0,k=0,ok=1;for(let i=0;i<n;i++)if(m>>i&1){c+=X[i].b;if(c>amt){ok=0;break}e+=X[i].l.emi;il+=X[i].a.il;k++}if(!ok)continue;if(!best||e>best.e||(e==best.e&&c<best.c))best={m,e,c,il,k}}}
+const sel=best?X.filter((_,i)=>best.m>>i&1).sort((x,y)=>y.l.emi/y.b-x.l.emi/x.b):[];if(!sel.length)return null;
+return `${inr(amt)} hain to ${Bo('meri recommendation')} (maine saare combinations check kiye):<br>`+sel.map((x,i)=>`${i+1}. ${Bo(x.l.lender)} — ~${inr(x.b)} dekar EMI ${inr(x.l.emi)}/mo free, ${inr(x.a.il)} interest bachega`).join('<br>')+`<br><br>Total lagega ~${Bo(inr(best.c))}, ${inr(amt-best.c)} bach jayega<br>EMI ${inr(M)} → ${Bo(inr(M-best.e)+'/mo')} (${inr(best.e)}/mo kam) · interest bachat ~${inr(best.il)}<br><br>${Bo('Kyun yahi:')} is budget mein yahi combination sabse zyada mahine ki EMI free karta hai.<br><span class=mu>Approx hai. Foreclosure charge/GST lender se pooch lo.</span>`}
+function lowTxt(){const X=xAct(),M=sum(X,x=>x.l.emi),B=sum(X,x=>x.b),av=M/B,r=X.map(x=>({...x,k:x.l.emi/x.b})).sort((p,q)=>q.k-p.k),f=r.filter(x=>x.k>av);
+return `Kul ${r.length} active loans mein se ${Bo(f.length+' loans')} aise hain jinka principal kam bacha hai par EMI zyada hai (EMI/baaki average se upar):<br>`+f.slice(0,8).map((x,i)=>`${i+1}. ${Bo(x.l.lender)} — baaki ${inr(x.b)}, EMI ${inr(x.l.emi)}/mo (${Math.round(x.k*100)}% of baaki), ${ml(x.l)} mahine`).join('<br>')+`<br><br>Ye sab band karne ka ~${Bo(inr(sum(f,x=>x.b)))} lagega aur ${Bo(inr(sum(f,x=>x.l.emi))+'/mo')} EMI free hogi.<br>${Bo('Meri recommendation:')} sabse pehle ${f[0]?f[0].l.lender:r[0].l.lender} band karo.<br><span class=mu>Inhe pehle band karne par kam paise mein zyada EMI free hoti hai. Average: EMI = baaki ka ${Math.round(av*100)}%.</span>`}
+function dayTxt(amt,T,E,D){const X=xAct(),t0=today(),V=(c,p)=>c>=p?`✓ ${Bo('Haan, close ho jayega')} — ${inr(c-p)} bach bhi jayega`:`✗ ${Bo('Nahi hoga')} — ${inr(p-c)} kam padega`,
+bAt=(x,m)=>{const nl=x.l.n-x.l.paid;if(m>=nl)return 0;const r=(x.a.rate||0)/1200;if(!r)return x.b*(1-m/nl);const g=Math.pow(1+r,m);return Math.max(0,x.b*g-x.l.emi*(g-1)/r)},
+note='<br><br><span class=mu>EMI time par bharte raho — ye roz ka jama EMI ke upar extra hai. Approx hai, foreclosure charge/GST alag.</span>';
+if(D.length){const l=D[0],dd=T?T*30:Math.max(1,Math.round((DD(l.due)-t0)/864e5)),dt=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+dd),pay=dc(l,DD(l.due)<dt?DD(l.due):dt).pay;
+if(!amt)return `${Bo(l.lender)} (daily loan) ${dd} din mein close karne ke liye roz ~${Bo(inr(Math.ceil(pay/dd)))} jama karo (payable ~${inr(pay)}).`;
+const c=amt*dd;return `${Bo(l.lender)} (daily loan)<br>${inr(amt)}/din × ${dd} din = ${Bo(inr(c))}<br>Tab payable ~${Bo(inr(pay))} (due ${fd(DD(l.due))})<br>${V(c,pay)}`+(c<pay?`<br>Close karne ke liye roz ~${Bo(inr(Math.ceil(pay/dd)))} chahiye.`:'')+note}
+const S=E.length?X.filter(x=>E.some(l=>l.id==x.l.id)):X;if(!S.length)return 'Is naam ka koi active loan nahi mila.';
+const nm=E.length?Bo(S[0].l.lender):'Saare '+Bo(S.length+' EMI loans'),need=a=>{for(let m=1;m<=120;m++)if(a*30*m>=sum(S,x=>bAt(x,m)))return m;return 0};
+if(!T){const m=need(amt);return `${nm}: ${inr(amt)}/din (${inr(amt*30)}/mahina) jama karne par ~${m?Bo(m+' mahine')+' mein close ho sakta hai':'120 mahine mein bhi close nahi hoga'}.`+note}
+const p=sum(S,x=>bAt(x,T));
+if(!amt)return `${nm} ${T} mahine mein close karne ke liye roz ~${Bo(inr(Math.ceil(p/(T*30))))} jama karo (${inr(Math.ceil(p/T))}/mahina). ${T} mahine baad band karne ka ~${inr(p)}.`+note;
+const c=amt*30*T;let o=`${nm}<br>${inr(amt)}/din × ${T*30} din = ${Bo(inr(c))} (${T} mahine)<br>${T} mahine baad band karne ka ~${Bo(inr(p))}<br>${V(c,p)}`;
+if(c<p){const m=need(amt);o+=`<br>Is rate se poora close hone mein ~${m?Bo(m+' mahine'):'bahut zyada time'} lagega, ya ${T} mahine ke liye roz ~${Bo(inr(Math.ceil(p/(T*30))))} chahiye.`}
+if(!E.length){let r=c;const ok=[],self=S.filter(x=>x.l.n-x.l.paid<=T);for(const x of S.filter(x=>x.l.n-x.l.paid>T).sort((a,b)=>bAt(a,T)-bAt(b,T))){const b=bAt(x,T);if(b>r)break;r-=b;ok.push(x)}
+o+=`<br><br>${Bo(inr(c))} se ${T} mahine baad ye loans band ho sakte hain:<br>`+(ok.length?ok.map(x=>`• ${x.l.lender} (~${inr(bAt(x,T))}, EMI ${inr(x.l.emi)}/mo free)`).join('<br>')+`<br>Total EMI free: ${Bo(inr(sum(ok,x=>x.l.emi))+'/mo')}`:'koi poora loan nahi')+(self.length?`<br><span class=mu>${self.length} loans to ${T} mahine mein khud khatam ho jayenge.</span>`:'')}
+return o+note}
+FQ.unshift([/daily (loan|interest)|roz ka interest|rollover|per day interest/,'Daily loan = chhote time ka loan jisme interest roz lagta hai (jaise 0.15%–1% per din, yaani saal ke hisaab se 55%–365%). Due date par poora chukao; late hone par roz penalty lagti hai. Naya daily loan lekar purana chukana (rollover) debt trap hai, kyunki processing fee har baar katti hai.']);
+function dailyAns(t,A,dn){const has=r=>r.test(t);if(has(/kya hota|kya hai|matlab|meaning|explain|samjha|rollover|trap/))return FQ[0][1];const S=dn?[dn]:A,R=S.map(l=>({l,c:dc(l)})).sort((x,y)=>(x.c.late?-x.c.late:x.c.left)-(y.c.late?-y.c.late:y.c.left)),
+dueIn=x=>x.c.late?`${x.c.late} din late, penalty ${inr(x.c.pen)}`:x.c.left==0?'aaj due':x.c.left+' din baaki',pd=x=>Math.ceil(x.l.repay/Math.max(1,x.c.left)),T0=a=>sum(a,x=>x.c.pay);
+const how=has(/kaise|kese|plan|strategy|tarika|upay|idea|pehle|chukau|nikal|utaru|jaldi/),when_=has(/kitne din|kab|kab tak|khatam|close|date|due|din m(ein|e)/),cost=has(/mehnga|costly|sabse (zyada|jyada)|rate|interest|effective|annual/),fee=has(/fee|kharcha|total|processing|mila|disburs/),pen=has(/penal|late|overdue/);
+if(how||(dn&&!when_&&!cost&&!fee&&!pen)){const P=R.slice().sort((x,y)=>(y.c.late?1:0)-(x.c.late?1:0)||x.c.left-y.c.left||y.l.rate-x.l.rate),late=P.filter(x=>x.c.late),ok=P.filter(x=>!x.c.late);
+return `🧠 ${Bo(dn?dn.lender+' ko khatam karne ka plan:':'Daily loans khatam karne ka mera plan (ek hi order):')}<br>`+P.map((x,i)=>`${i+1}. ${Bo(x.l.lender)} — ${x.c.late?'aaj hi '+inr(x.c.pay)+' chukao (roz +'+inr(x.c.pend)+' penalty badh rahi hai)':'due '+fd(DD(x.l.due))+' tak '+inr(x.l.repay)+' chahiye, roz ~'+Bo(inr(pd(x)))+' alag rakho ('+dueIn(x)+')'}`).join('<br>')+`<br><br>${late.length?'Abhi turant: '+Bo(inr(T0(late)))+' (late loans). ':''}${ok.length?'Agle 7 din mein chahiye: '+Bo(inr(sum(ok.filter(x=>x.c.left<=7),x=>x.l.repay)))+' · poore '+Math.max(...ok.map(x=>x.c.left))+' din mein: '+Bo(inr(sum(ok,x=>x.l.repay)))+'.':''}<br><br>${Bo('Kyun is order mein:')} pehle late loan (penalty roz badhti hai), phir jiski due date pehle aati hai — har date par paisa ready rakho. Paise kam pade to sabse zyada rate/din wale ko pehle chukao.<br>${Bo('Dhyan rakho:')} 1) naya daily loan lekar purana mat chukao (fee har baar katti hai). 2) Due se 1 din pehle paise ready rakho. 3) Aaj hi chuka do to interest kam: ${inr(T0(R))} (due par ${inr(sum(R,x=>x.c.late?x.c.pay:x.l.repay))}).`}
+if(when_){const last=R.reduce((m,x)=>Math.max(m,+DD(x.l.due)),0),mx=Math.max(0,...R.map(x=>x.c.left));
+return `${Bo('Daily loans kitne din mein khatam')}:<br>`+R.map(x=>`• ${Bo(x.l.lender)} — ${dueIn(x)} · due ${fd(DD(x.l.due))} · tab ${inr(x.l.repay)}`).join('<br>')+`<br><br>${dn?'':'Sab daily loans '+Bo(fd(new Date(last)))+' tak ('+mx+' din) khatam ho jayenge agar due par chuka do. '}Abhi band karna ho to ${Bo(inr(T0(R)))} lagega.<br><span class=mu>Jaldi close karne ka plan chahiye to "daily loans kaise khatam karun" poochho.</span>`}
+if(cost){const C=R.slice().sort((x,y)=>y.l.rate-x.l.rate);return `${Bo('Daily loans — sabse mehnga kaun')}:<br>`+C.map((x,i)=>`${i+1}. ${Bo(x.l.lender)} — ${x.l.rate}%/din (~${Math.round(x.l.rate*365)}%/saal), ${inr(x.l.net)} mile aur ${inr(x.l.repay)} dene hain (kharcha ${inr(x.l.repay-x.l.net)} = ${Math.round((x.l.repay-x.l.net)/x.l.net*100)}%)`).join('<br>')+`<br><br>${Bo('Meri recommendation:')} sabse pehle ${C[0].l.lender} chukao.`}
+if(fee){return `${Bo('Daily loans ka kharcha')}:<br>Loan amount ${inr(sum(R,x=>x.l.principal))} · Processing fee ${inr(sum(R,x=>fe(x.l)))} · Hath mein mila ${inr(sum(R,x=>x.l.net))}<br>Due par dena: ${Bo(inr(sum(R,x=>x.l.repay)))} → total kharcha ${Bo(inr(sum(R,x=>x.l.repay-x.l.net)))} (${Math.round(sum(R,x=>x.l.repay-x.l.net)/Math.max(1,sum(R,x=>x.l.net))*100)}% of mile paise)`}
+if(pen){const L2=R.filter(x=>x.c.late);return L2.length?`${Bo('Late daily loans')}:<br>`+L2.map(x=>`• ${Bo(x.l.lender)} — ${x.c.late} din late, penalty ${inr(x.c.pen)}, aaj payable ${inr(x.c.pay)} (roz +${inr(x.c.pend)})`).join('<br>')+'<br>Jitni jaldi chukaoge utni penalty kam.':'Abhi koi daily loan late nahi hai ✓'}
+return dtxt(S)}
+function brain(q){let r=brain0(q);const t=q.toLowerCase();if(/alert|agli|next emi|upcoming|due hai|kab bharna|kya due/.test(t)&&!/daily|\broz\b/.test(t)&&!r.includes('Daily loans')){const D=alerts().filter(x=>x.ty=='Daily');if(D.length)r+='<br><br>'+Bo('Daily loans (5 din ke andar)')+':<br>'+D.map(x=>`• ${Bo(x.l.lender)} — ${when(x.d)}, ${inr(x.amt)} (due ${fd(DD(x.l.due))})`).join('<br>')}return r}
+
+let HX=false;
+function fe(l){return l.fee!=null&&l.fee!==''?+l.fee:Math.max(0,(l.principal||0)-(l.net||0))}
+function dfx(src){const g=x=>$('#d_'+x),p=+g('principal').value,f=+g('fee').value,n=+g('net').value;if(src=='net')g('fee').value=p&&n?Math.max(0,p-n):'';else g('net').value=p?Math.max(0,p-f):'';const ff=+g('fee').value,h=$('#d_fh');if(h)h.textContent=p&&ff?'Fee = '+(ff/p*100).toFixed(1)+'% of loan':''}
+function hitems(){const o=[];L.filter(act).forEach(l=>o.push({n:l.lender,ty:'EMI',amt:l.emi,d:days(l),dt:nxt(l),i:'EMI '+(l.paid+1)+' of '+l.n}));
+DL.filter(dact).forEach(l=>{const c=dc(l);o.push({n:l.lender,ty:'Daily',amt:c.pay,d:c.late?-c.late:c.left,dt:DD(l.due),i:c.late?'penalty '+inr(c.pen):'payable today'})});return o.sort((x,y)=>x.d-y.d)}
+function hind(){const I=hitems(),od=I.filter(x=>x.d<0),td=I.filter(x=>x.d==0),wk=I.filter(x=>x.d>0&&x.d<=7),lt=I.filter(x=>x.d>7),s5=I.filter(x=>x.d>=0&&x.d<=5),mo=sum(L.filter(act),l=>l.emi),inc=+INC(),fo=inc?mo/inc*100:0,T=a=>sum(a,x=>x.amt);
+let v=od.length?['bad','Needs attention',od.length+' overdue · '+inr(T(od))+' abhi chukao']:s5.length?['wn','Watch this week',s5.length+' payment next 5 days · '+inr(T(s5))]:['ok','On track','Nothing overdue or due soon'];
+if(inc&&fo>50&&v[0]=='ok')v=['wn','Heavy EMI load','EMIs take '+Math.round(fo)+'% of your income'];
+const row=x=>`<div class="row"><span class="r" style="justify-content:flex-start"><span class="dot" style="background:${clr(x.d)}"></span><span><b>${x.n}</b> <span class="tg${x.ty=='Daily'?' dl':''}">${x.ty}</span><br><span class="mu" style="color:${clr(x.d)}">${when(x.d)} · ${fd(x.dt)} · ${x.i}</span></span></span><b class="emi">${inr(x.amt)}</b></div>`,
+G=(t,a,c)=>a.length?`<div class="gh" style="color:${c}">${t} · ${a.length} · ${inr(T(a))}</div>${a.map(row).join('')}`:'';
+return `<div class="c ${v[0]}"><div class="ind" data-a="hx" style="cursor:pointer"><span class="pul"></span><span style="color:var(--tx);flex:1;min-width:0"><b style="font-family:var(--fd);font-size:17px">${v[1]}</b><br><span class="mu">${v[2]}</span>${inc?`<br><span class="mu">EMI is ${Math.round(fo)}% of income (safe below 40%)</span>`:''}</span><span class="mu" style="color:var(--mu);font-size:20px">${HX?'⌃':'⌄'}</span></div>
+<div class="kp" style="grid-template-columns:repeat(3,1fr);margin:0 16px 14px;color:var(--tx)"><div><span class="mu">Overdue</span><b class="${od.length?'bad':''}">${inr(T(od))}</b></div><div><span class="mu">Next 7 days</span><b>${inr(T(td)+T(wk))}</b></div><div><span class="mu">Daily payable</span><b>${inr(sum(I.filter(x=>x.ty=='Daily'),x=>x.amt))}</b></div></div>
+${HX?`<div style="color:var(--tx)">${G('Overdue',od,'var(--bad)')}${G('Due today',td,'var(--wn)')}${G('Next 7 days',wk,'var(--ac)')}${G('Later',lt,'var(--mu)')}${I.length?`<div class="row mu"><span>${I.filter(x=>x.ty=='EMI').length} EMI · ${I.filter(x=>x.ty=='Daily').length} daily loans</span><b style="color:var(--tx)">Total ${inr(T(I))}</b></div>`:'<div class="row mu">No active loans.</div>'}</div>`:''}</div>`}
+function hmo(){const A=L.filter(act),t=today(),M=[...Array(12)].map((_,m)=>({m,v:sum(A.filter(l=>l.n-l.paid>m),l=>l.emi)})),mx=Math.max(1,...M.map(x=>x.v));if(!A.length)return '';
+return `<div class="c p"><div class="r"><b>EMI burden, next 12 months</b><span class="mu">${inr(M[0].v)} now</span></div><div class="mb">${M.map(x=>`<div><b><i style="height:${Math.max(4,x.v/mx*100)}%"></i></b><span>${MN[(t.getMonth()+x.m)%12].slice(0,1)}</span></div>`).join('')}</div><div class="mu" style="margin-top:8px">${M[11].v<M[0].v?'Drops to <b class="ok">'+inr(M[11].v)+'</b> by '+MN[(t.getMonth()+11)%12]:'No EMI ends in this window'}</div></div>`}
+function hbrk(){const X=L.filter(act).map(l=>{const a=an(l),b=Math.max(0,a.bal);return{l,t:tot(l),p:tot(l)-left(l),b,i:Math.max(0,left(l)-b),d:days(l)}}).sort((x,y)=>x.d-y.d),mx=Math.max(1,...X.map(x=>x.t));if(!X.length)return '';
+return `<div class="c p"><b>Loan breakdown</b>${X.map(x=>`<div class="br"><div class="r"><span><b>${x.l.lender}</b> <span class="mu" style="color:${x.d<0?'var(--bad)':x.d<=5?'var(--wn)':'var(--ok)'}">${x.d<0?'overdue':x.d<=5?'due soon':'on time'}</span></span><span class="mu">${inr(left(x.l))} left</span></div><div class="sb" style="width:${x.t/mx*100}%"><i style="flex:${x.p};background:var(--ok)"></i><i style="flex:${x.b};background:var(--ac)"></i><i style="flex:${x.i};background:var(--bad)"></i></div></div>`).join('')}${LG([['var(--ok)','Paid'],['var(--ac)','Principal left'],['var(--bad)','Interest left']])}</div>`}
+function dchart(){const A=DL.filter(dact);if(!A.length)return '';const t=today(),P=[...Array(15)].map((_,k)=>sum(A,l=>dc(l,new Date(t.getFullYear(),t.getMonth(),t.getDate()+k)).pay)),mn=Math.min(...P),mx=Math.max(...P),y=v=>mx==mn?50:88-(v-mn)/(mx-mn)*72,x=k=>8+k*20.3,pa=P.map((v,k)=>(k?'L':'M')+x(k).toFixed(1)+' '+y(v).toFixed(1)).join(''),X=A.map(l=>({l,c:dc(l)})),m=Math.max(1,...X.map(z=>z.l.principal+z.c.acc+z.c.pen));
+return `<div class="c p"><div class="r"><b>Payable, next 14 days</b><span class="mu">${inr(P[0])} → <b class="bad">${inr(P[14])}</b></span></div><svg viewBox="0 0 300 100" style="width:100%;margin-top:8px"><defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bad)" stop-opacity=".28"/><stop offset="1" stop-color="var(--bad)" stop-opacity="0"/></linearGradient></defs><path d="${pa}L292 98L8 98Z" fill="url(#dg)"/><path d="${pa}" fill="none" stroke="var(--bad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${x(0)}" cy="${y(P[0])}" r="4" fill="var(--bad)"/></svg><div class="r mu"><span>Aaj</span><span>+14 din</span></div><div class="mu" style="margin-top:6px">Agar na chukao to 14 din mein <b class="bad">+${inr(P[14]-P[0])}</b> badhega</div>
+${X.map(z=>`<div class="br"><div class="r"><b>${z.l.lender}</b><span class="mu">${inr(z.c.pay)} aaj</span></div><div class="sb" style="width:${(z.l.principal+z.c.acc+z.c.pen)/m*100}%"><i style="flex:${z.l.principal};background:var(--ac)"></i><i style="flex:${Math.max(z.c.acc,0)};background:var(--wn)"></i><i style="flex:${Math.max(z.c.pen,0)};background:var(--bad)"></i></div></div>`).join('')}${LG([['var(--ac)','Principal'],['var(--wn)','Interest ab tak'],['var(--bad)','Penalty']])}</div>`}
+function dtxt(a){const c=a.map(l=>({l,c:dc(l),n:dc(l,dtm())}));return Bo('Daily loans')+' ('+a.length+')<br>'+NL(c.map(x=>`${Bo(x.l.lender)} — aaj ${inr(x.c.pay)}, kal ${inr(x.n.pay)} · ${x.c.late?x.c.late+' din late, penalty '+inr(x.c.pen):x.c.left==0?'aaj due':x.c.left+' din baaki'} (${fd(DD(x.l.due))})`))+`<br><br>Total aaj ${Bo(inr(sum(c,x=>x.c.pay)))}, roz ~${inr(sum(c,x=>x.c.late?x.c.pend:x.c.d<x.l.tenure?x.c.pd:0))} badhta hai.<br><span class=mu>Daily loan sabse mehnga hota hai, due date se pehle isse chukao.</span>`}
+/* GitHub live sync */
+const GK='loantracker_gh',b64=s=>btoa(unescape(encodeURIComponent(s))),ub64=s=>decodeURIComponent(escape(atob(s.replace(/\s/g,''))));let GH=null,gsha=null,gt=null,gbusy=false,GST='';try{GH=JSON.parse(localStorage.getItem(GK))}catch(e){}
+const gh=(q,o={})=>fetch('https://api.github.com/repos/'+GH.repo+'/contents/'+GH.path+q,{cache:'no-store',...o,headers:{Authorization:'Bearer '+GH.token,Accept:'application/vnd.github+json','Content-Type':'application/json'}});
+function gui(){const e=$('#gst');if(e&&GH)e.textContent=GST;if(GH&&/error/i.test(GST)){if(!gui.s){gui.s=1;showErr(GST)}}else gui.s=0}
+function gsched(){if(!GH)return;clearTimeout(gt);gt=setTimeout(gpush,1500)}
+async function gpull(force){if(!GH||gbusy)return;gbusy=true;try{const r=await gh('?ref='+GH.branch+'&t='+Date.now());
+if(r.status==404){gbusy=false;gsha=null;return gpush()}if(!r.ok)throw r.status;const j=await r.json();
+if(j.sha!=gsha||force){const d=JSON.parse(ub64(j.content));gsha=j.sha;if(Array.isArray(d.loans))L=d.loans;if(Array.isArray(d.daily))DL=d.daily;try{localStorage.setItem(K,JSON.stringify(L));localStorage.setItem(K2,JSON.stringify(DL))}catch(e){}if(V!='add'&&V!='dadd')render()}
+GST='Synced ✓ '+tm()}catch(e){GST='Sync error ('+e+') — repo/token check karo'}gbusy=false;gui()}
+async function gpush(){if(!GH)return;if(gbusy){gsched();return}gbusy=true;try{for(let k=0;k<3;k++){const r=await gh('',{method:'PUT',body:JSON.stringify({message:'Loan Tracker update',content:b64(JSON.stringify({loans:L,daily:DL,updated:new Date().toISOString()},null,1)),branch:GH.branch,...(gsha?{sha:gsha}:{})})});
+if(r.ok){gsha=(await r.json()).content.sha;GST='Synced ✓ '+tm();break}
+if(r.status==409||r.status==422){const g=await gh('?ref='+GH.branch+'&t='+Date.now());gsha=g.ok?(await g.json()).sha:null;continue}throw r.status}}catch(e){GST='Sync error ('+e+')'}gbusy=false;gui()}
+function gcard(){const g=GH||{repo:'',path:'data/loans.json',branch:'main',token:''},f=(id,lb,t,ph)=>`<div class="fr"><label>${lb}</label><input id="g_${id}" type="${t}" value="${g[id]}" placeholder="${ph}" autocomplete="off"></div>`;
+return `<h2>Live sync (GitHub)</h2><div class="c">${f('repo','Repo','text','username/loan-data')}${f('path','File path','text','data/loans.json')}${f('branch','Branch','text','main')}${f('token','Token','password','github_pat_…')}</div><div class="r" style="margin:0 4px"><button class="pri" data-a="gh_save">${GH?'Update':'Connect'}</button>${GH?'<button data-a="gh_now">Sync now</button><button class="t d" data-a="gh_off">Disconnect</button>':''}</div><div id="gst" class="mu" style="margin:8px 6px 12px">${GH?GST:'Private repo banao, fine-grained token do (sirf us repo par Contents: Read and write).'}</div><h2>Monthly income (optional)</h2><div class="c"><div class="fr"><label>Income ₹</label><input type="number" inputmode="decimal" value="${INC()}" onchange="try{localStorage.setItem('loantracker_inc',this.value)}catch(e){}"></div></div>`}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b||!b.dataset.a.startsWith('gh_'))return;const k=b.dataset.a.slice(3);
+if(k=='off'){GH=null;gsha=null;try{localStorage.removeItem(GK)}catch(x){}render();toast('Sync band');return}
+if(k=='now'){await gpull(true);toast(GST);return}
+const g=x=>$('#g_'+x).value.trim();GH={repo:g('repo').replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,''),path:g('path')||'data/loans.json',branch:g('branch')||'main',token:g('token')};
+if(!/^[^\/]+\/[^\/]+$/.test(GH.repo)||!GH.token){GH=null;toast('Repo (user/repo) aur token bharo');return}
+try{localStorage.setItem(GK,JSON.stringify(GH))}catch(x){}gsha=null;toast('Connecting…');
+try{const r=await gh('?ref='+GH.branch);if(r.ok){const j=await r.json();if(confirm('GitHub par data mila.\nOK = wahan ka data laao (local replace hoga)\nCancel = local data GitHub par bhejo')){await gpull(true)}else{gsha=j.sha;await gpush()}}else if(r.status==404)await gpush();else GST='Connect nahi hua ('+r.status+') — repo/token check karo'}catch(x){GST='Network error'}
+render();toast(GST.startsWith('Synced')?'Live sync on ✓':GST)});
+setInterval(()=>{if(!document.hidden)gpull()},20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)gpull()});setTimeout(gpull,600);
+
+let SV='m';
+const lstat=()=>`<div class="kp" style="grid-template-columns:repeat(3,1fr)"><div><span class="mu">Total loans</span><b style="font-size:20px">${L.length}</b></div><div><span class="mu">Active</span><b class="wn" style="font-size:20px">${L.filter(act).length}</b></div><div><span class="mu">Closed</span><b class="ok" style="font-size:20px">${L.filter(l=>!act(l)).length}</b></div></div><button class="pri" onclick="RK='sched';go('prh')" style="width:100%;padding:13px;margin-bottom:12px">EMI repayment schedule · Print</button>`;
+function sch(){const A=L.filter(act),M={};A.forEach(l=>{for(let k=l.paid;k<l.n;k++){const d=due(l,k),key=d.getFullYear()*100+d.getMonth();(M[key]=M[key]||{d,e:[]}).e.push({l,k})}});
+let run=sum(A,left);const rows=Object.keys(M).sort((a,b)=>a-b).map(k=>{const r=M[k],t=sum(r.e,x=>x.l.emi);run-=t;return{d:r.d,e:r.e,t,rem:run}}),Y={};
+rows.forEach(r=>{const y=r.d.getFullYear(),o=Y[y]=Y[y]||{t:0,n:0,m:0,c:0};o.t+=r.t;o.n+=r.e.length;o.m++;o.c+=r.e.filter(x=>x.k==x.l.n-1).length});
+const last=rows[rows.length-1],mo=A.length?sum(A,l=>l.emi):0;
+return `<h1 class="noprint">EMI schedule</h1><div class="noprint" style="margin-bottom:12px"><button class="pri" data-a="prt" style="width:100%;padding:13px">Print / Save as PDF</button></div>
+<div class="seg noprint"><button class="${SV=='m'?'on':''}" data-a="sv" data-v="m">Monthly + yearly</button><button class="${SV=='y'?'on':''}" data-a="sv" data-v="y">Yearly only</button></div>
+<div class="sheet sch"><div class="r" style="align-items:flex-start"><div><div style="font-size:21px;font-weight:700">EMI repayment schedule</div><div class="mu">Printed on ${fd(new Date())} · remaining EMIs only</div></div><div style="text-align:right"><div class="mu">Total remaining</div><div style="font-size:21px;font-weight:700">${inr(sum(A,left))}</div></div></div>
+<div class="kp"><div><span class="mu">Total loans</span><b>${L.length}</b></div><div><span class="mu">Active</span><b>${A.length}</b></div><div><span class="mu">Monthly EMI now</span><b>${inr(mo)}</b></div><div><span class="mu">Last EMI</span><b>${last?mon(last.d):'-'}</b></div></div>
+<h2 style="margin:8px 0 6px;color:var(--tx)">Year-wise</h2><div class="tw"><table style="min-width:0"><thead><tr><th>Year</th><th class="n">Months</th><th class="n">EMIs</th><th class="n">Loans closing</th><th class="n">Total to pay</th></tr></thead><tbody>${Object.keys(Y).map(y=>`<tr><td><b>${y}</b></td><td class="n">${Y[y].m}</td><td class="n">${Y[y].n}</td><td class="n">${Y[y].c||'-'}</td><td class="n"><b>${inr(Y[y].t)}</b></td></tr>`).join('')||'<tr><td colspan="5">No active loans.</td></tr>'}</tbody></table></div>
+${SV=='m'?`<h2 style="margin:16px 0 6px;color:var(--tx)">Month-wise</h2><div class="tw"><table style="min-width:0"><thead><tr><th>Month</th><th>EMIs due</th><th class="n">Total</th><th class="n">Balance after</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="white-space:nowrap"><b>${mon(r.d)}</b></td><td>${r.e.map(x=>`${x.l.lender} ${inr(x.l.emi)}${x.k==x.l.n-1?' <b>(last)</b>':''}`).join('<br>')}</td><td class="n"><b>${inr(r.t)}</b></td><td class="n">${inr(Math.max(0,r.rem))}</td></tr>`).join('')}</tbody></table></div>`:''}</div>
+<button class="noprint" onclick="go('loans')" style="margin-top:12px">‹ Back to all loans</button>`}
+
+IC.prh=IC.print;let RK='sched';
+const isN=(x,i)=>x.m&&x.m.includes(i),rm=(c,i,x)=>c instanceof Date?fd(c):c==null?'':isN(x,i)&&typeof c=='number'?inr(c):c,fnm=k=>'loan-'+k+'-'+iso(today()),stt=x=>x.p?'Paid':x.d<today()?'Overdue':+x.d==+today()?'Due today':'Upcoming';
+function emis(){const o=[];L.forEach(l=>{let bal=tot(l);for(let k=0;k<l.n;k++){bal-=l.emi;o.push({l,k,d:due(l,k),bal:Math.max(0,bal),p:k<l.paid})}});return o.sort((a,b)=>a.d-b.d||a.l.lender.localeCompare(b.l.lender))}
+function schD(){const A=L.filter(act).sort((a,b)=>nxt(a)-nxt(b)),E=emis().filter(x=>!x.p),M={},Y={};
+E.forEach(x=>{(M[x.d.getFullYear()*100+x.d.getMonth()]=M[x.d.getFullYear()*100+x.d.getMonth()]||[]).push(x);const y=x.d.getFullYear(),o=Y[y]=Y[y]||{m:new Set(),n:0,c:0,t:0};o.m.add(x.d.getMonth());o.n++;o.t+=x.l.emi;if(x.k==x.l.n-1)o.c++});
+const rows=[];Object.keys(M).sort((a,b)=>a-b).forEach(k=>{const g=M[k];g.forEach((x,i)=>rows.push([i?'':mon(x.d),x.d,x.l.lender,(x.k+1)+' of '+x.l.n+(x.k==x.l.n-1?' (last)':''),x.l.emi]));const r=['','','Total '+mon(g[0].d),'',sum(g,x=>x.l.emi)];r.sub=1;rows.push(r)});
+const gt=['','','GRAND TOTAL','',sum(E,x=>x.l.emi)];gt.sub=1;rows.push(gt);
+return[{name:'Loan-wise',head:['Loan','EMI','EMIs left','Paid','Total left','Last EMI'],rows:A.map(l=>[l.lender,l.emi,l.n-l.paid,l.paid+'/'+l.n,left(l),mon(due(l,l.n-1))]),m:[1,4]},
+{name:'Year-wise',head:['Year','Months','EMIs','Loans closing','Total to pay'],rows:Object.keys(Y).map(y=>[y,Y[y].m.size,Y[y].n,Y[y].c,Y[y].t]),m:[4]},
+{name:'Month-wise',head:['Month','Due date','Loan','EMI no.','Amount'],rows,m:[4]}]}
+const schX=()=>[{name:'Schedule',head:['Due date','Month','Loan','EMI no.','Amount','Status','Balance after'],rows:emis().map(x=>[x.d,mon(x.d),x.l.lender,x.k+1,x.l.emi,stt(x),x.bal]),m:[4,6]},schD()[0],schD()[1]];
+const loansD=()=>[{name:'Loans',head:['Lender','Loan amount','EMI','Paid','Total payable','Remaining','Next due','Interest paid','Ends'],rows:srt().map(l=>[l.lender,l.principal||0,l.emi,l.paid+'/'+l.n,tot(l),left(l),act(l)?nxt(l):'Closed',Math.round(an(l).ip),mon(an(l).end)]),m:[1,2,4,5,7]}];
+const upD=()=>[{name:'Upcoming',head:['#','Loan','Due date','EMI no.','Amount','Status'],rows:upc().map((x,i)=>[i+1,x.l.lender,x.d,(x.l.paid+1)+' of '+x.l.n,x.l.emi,when(x.n)]),m:[4]}];
+const dailyD=()=>[{name:'Daily loans',head:['Loan','Loan amount','Processing fee','Disbursed (hath mein)','Rate/din','Disbursal date','Due date','Total on due','Payable today','Penalty','Status'],rows:DL.map(l=>{const c=dc(l);return[l.lender,l.principal,fe(l),l.net,l.rate+'%',DD(l.start),DD(l.due),l.repay,l.paid?l.repay:Math.round(c.pay),Math.round(c.pen),l.paid?'Paid '+fd(DD(l.paid)):c.late?c.late+' din late':c.left==0?'Aaj due':c.left+' din baaki']}),m:[1,2,3,7,8,9]}];
+const allD=()=>[...loansD(),...schD(),...dailyD(),...upD()],allX=()=>[...loansD(),...schX(),...dailyD(),...upD()];
+function kpS(){const A=L.filter(act),last=A.length?mon(new Date(Math.max(...A.map(l=>+due(l,l.n-1))))):'-';return[['Total loans',L.length],['Active',A.length],['Monthly EMI',inr(sum(A,l=>l.emi))],['Total remaining',inr(sum(A,left))],['Last EMI',last]]}
+const kpL=()=>[['Total loans',L.length],['Active',L.filter(act).length],['Closed',L.filter(l=>!act(l)).length],['Total remaining',inr(sum(L,left))]],kpD=()=>{const A=DL.filter(dact);return[['Daily loans',DL.length],['Active',A.length],['Payable today',inr(sum(A,l=>dc(l).pay))],['Overdue',A.filter(l=>dc(l).late).length]]},kpU=()=>[['Upcoming EMIs',upc().length],['Total amount',inr(sum(upc(),x=>x.l.emi))]];
+const RP={sched:{n:'EMI repayment schedule',f:schD,x:schX,k:kpS},loans:{n:'All loans summary',f:loansD,k:kpL},up:{n:'Upcoming EMI list',f:upD,k:kpU},daily:{n:'Daily loans report',f:dailyD,k:kpD},all:{n:'Complete report',f:allD,x:allX,k:kpS}};
+function paper(R){const S=R.f();return `<div style="font-size:21px;font-weight:700">${R.n}</div><div class="mu">Printed on ${fd(new Date())} · ${L.length} loans · ${DL.length} daily loans</div><div class="kp">${R.k().map(x=>`<div><span class="mu">${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>${S.map(x=>`<h2>${x.name}</h2><div class="tw"><table><thead><tr>${x.head.map((h,i)=>`<th class="${isN(x,i)?'n':''}">${h}</th>`).join('')}</tr></thead><tbody>${x.rows.map(r=>`<tr class="${r.sub?'s':''}">${r.map((c,i)=>`<td class="${isN(x,i)?'n':''}">${rm(c,i,x)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${x.head.length}">No data</td></tr>`}</tbody></table></div>`).join('')}`}
+function prh(){return `<div class="noprint"><h1>Print &amp; share</h1><div class="chips">${Object.keys(RP).map(k=>`<button class="${RK==k?'on':''}" data-a="rx_sel" data-k="${k}">${RP[k].n}</button>`).join('')}</div><div class="r" style="gap:8px;flex-wrap:wrap;justify-content:flex-start;margin-bottom:6px"><button class="pri" data-a="rx_pr">Print</button><button data-a="rx_wa">WhatsApp</button><button data-a="rx_xl">Excel</button><button data-a="rx_csv">CSV</button></div><h2 style="margin:12px 4px 8px">Print preview</h2></div><div class="sheet paper">${paper(RP[RK])}</div>`}
+const PCSS='body{font:13px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;color:#111;margin:16px}h2{font-size:14px;margin:18px 0 6px}.mu{color:#666;font-size:12px}table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;border-bottom:1.5px solid #111;padding:6px}td{padding:6px;border-bottom:.5px solid #ccc}.n{text-align:right}tr.s td{font-weight:700;background:#f1f1f6}thead{display:table-header-group}tr{break-inside:avoid}.kp{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.kp div{flex:1;min-width:110px;background:#f3f3f8;border-radius:8px;padding:8px}.kp b{display:block;font-size:14px}@page{margin:12mm}';
+function ppr(){const R=RP[RK],w=window.open('','_blank');if(!w){window.print();return}w.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+R.n+'</title><style>'+PCSS+'</style></head><body>'+paper(R)+'</body></html>');w.document.close();w.focus();setTimeout(()=>{try{w.print()}catch(e){}},500)}
+function wat(k){const A=L.filter(act),H='*'+RP[k].n+'*\n📅 '+fd(new Date())+'\n',
+loansT=()=>'\n*Loans — '+A.length+' active / '+L.length+' total*\n'+srt().filter(act).map((l,i)=>(i+1)+'. *'+l.lender+'* — EMI '+inr(l.emi)+'\n     '+l.paid+'/'+l.n+' paid · baaki '+inr(left(l))+' · next '+fd(nxt(l))).join('\n')+'\n\n*Monthly EMI: '+inr(sum(A,l=>l.emi))+'*\n*Total baaki: '+inr(sum(A,left))+'*',
+schT=()=>{const E=emis().filter(x=>!x.p),M={};E.forEach(x=>{(M[mon(x.d)]=M[mon(x.d)]||[]).push(x)});return '\n*Year-wise*\n'+schD()[1].rows.map(r=>r[0]+': '+inr(r[4])+' ('+r[2]+' EMI'+(r[3]?', '+r[3]+' loan band':'')+')').join('\n')+'\n\n*Agle mahine*\n'+Object.keys(M).slice(0,4).map(k=>'*'+k+'* — '+inr(sum(M[k],x=>x.l.emi))+'\n'+M[k].map(x=>'  • '+x.l.lender+' '+inr(x.l.emi)+' (EMI '+(x.k+1)+'/'+x.l.n+')').join('\n')).join('\n\n')+'\n\n*Total baaki: '+inr(sum(E,x=>x.l.emi))+'*'},
+upT=()=>'\n*Upcoming EMI*\n'+(upc().map((x,i)=>(i+1)+'. *'+x.l.lender+'* — '+inr(x.l.emi)+' — '+fd(x.d)+' ('+when(x.n)+')').join('\n')||'Koi EMI due nahi')+'\n\n*Total: '+inr(sum(upc(),x=>x.l.emi))+'*',
+dT=()=>{const D=DL.filter(dact);return '\n*Daily loans*\n'+(D.map(l=>{const c=dc(l);return '• *'+l.lender+'* — aaj '+inr(c.pay)+'\n     mila '+inr(l.net)+' (fee '+inr(fe(l))+')\n     due '+fd(DD(l.due))+' ('+(c.late?c.late+' din late':c.left==0?'aaj':c.left+' din baaki')+')'}).join('\n')||'Koi active daily loan nahi')+(D.length?'\n\n*Total aaj: '+inr(sum(D,l=>dc(l).pay))+'*':'')};
+return H+({sched:schT,loans:loansT,up:upT,daily:dT,all:()=>loansT()+'\n'+dT()+'\n'+upT()}[k])()}
+function wsend(){let t=wat(RK);if(t.length>2800)t=t.slice(0,2800).replace(/\n[^\n]*$/,'')+'\n… (poori detail Excel/PDF mein)';const u='https://wa.me/?text='+encodeURIComponent(t);try{navigator.clipboard&&navigator.clipboard.writeText(t)}catch(e){}if(!window.open(u,'_blank'))location.href=u}
+const dlb=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500)};
+function csv(k){const q=v=>'"'+String(v instanceof Date?iso(v):v??'').replace(/"/g,'""')+'"',S=(RP[k].x||RP[k].f)();dlb(new Blob(['\ufeff'+S.map(x=>x.name+'\n'+[x.head,...x.rows].map(r=>r.map(q).join(',')).join('\n')).join('\n\n')],{type:'text/csv'}),fnm(k)+'.csv')}
+function crc(b){const T=crc.t||(crc.t=Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0}));let r=-1;for(let i=0;i<b.length;i++)r=T[(r^b[i])&255]^(r>>>8);return(r^-1)>>>0}
+function zip(F){const en=new TextEncoder(),P=[],C=[];let off=0;for(const[n,t]of F){const nb=en.encode(n),d=en.encode(t),c=crc(d),h=new DataView(new ArrayBuffer(30)),e=new DataView(new ArrayBuffer(46));
+h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint16(12,0x21,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nb.length,true);
+e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(8,0x800,true);e.setUint16(14,0x21,true);e.setUint32(16,c,true);e.setUint32(20,d.length,true);e.setUint32(24,d.length,true);e.setUint16(28,nb.length,true);e.setUint32(42,off,true);
+P.push(new Uint8Array(h.buffer),nb,d);C.push(new Uint8Array(e.buffer),nb);off+=30+nb.length+d.length}
+const z=new DataView(new ArrayBuffer(22));z.setUint32(0,0x06054b50,true);z.setUint16(8,F.length,true);z.setUint16(10,F.length,true);z.setUint32(12,C.reduce((s,x)=>s+x.length,0),true);z.setUint32(16,off,true);
+return new Blob([...P,...C,new Uint8Array(z.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+function xbuild(S){const X=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'),col=i=>String.fromCharCode(65+i),ser=d=>Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(1899,11,30))/864e5),NS='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+const sh=S.map(s=>{const w=s.head.map((h,i)=>Math.min(46,Math.max(String(h).length,...s.rows.map(r=>r[i] instanceof Date?12:String(r[i]??'').length))+3)),
+cell=(v,r,i)=>{const a=col(i)+r;if(v instanceof Date)return `<c r="${a}" s="3"><v>${ser(v)}</v></c>`;if(typeof v=='number'&&isFinite(v))return `<c r="${a}"${s.m&&s.m.includes(i)?' s="2"':''}><v>${v}</v></c>`;return `<c r="${a}" t="inlineStr"><is><t>${X(v??'')}</t></is></c>`};
+return H+`<worksheet ${NS}><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${w.map((x,i)=>`<col min="${i+1}" max="${i+1}" width="${x}" customWidth="1"/>`).join('')}</cols><sheetData><row r="1" ht="22" customHeight="1">${s.head.map((h,i)=>`<c r="${col(i)}1" s="1" t="inlineStr"><is><t>${X(h)}</t></is></c>`).join('')}</row>${s.rows.map((r,j)=>`<row r="${j+2}">${r.map((v,i)=>cell(v,j+2,i)).join('')}</row>`).join('')}</sheetData><autoFilter ref="A1:${col(s.head.length-1)}${s.rows.length+1}"/></worksheet>`});
+const n=S.length,RN='http://schemas.openxmlformats.org/officeDocument/2006/relationships',OD='application/vnd.openxmlformats-officedocument.spreadsheetml.';
+return zip([['[Content_Types].xml',H+`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${OD}sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="${OD}styles+xml"/>${S.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="${OD}worksheet+xml"/>`).join('')}</Types>`],
+['_rels/.rels',H+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${RN}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+['xl/workbook.xml',H+`<workbook ${NS} xmlns:r="${RN}"><sheets>${S.map((s,i)=>`<sheet name="${X(s.name.replace(/[\\\/?*\[\]:]/g,'').slice(0,31))}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`],
+['xl/_rels/workbook.xml.rels',H+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${S.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${RN}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${n+1}" Type="${RN}/styles" Target="styles.xml"/></Relationships>`],
+['xl/styles.xml',H+`<styleSheet ${NS}><numFmts count="2"><numFmt numFmtId="164" formatCode="&quot;₹&quot;#,##0"/><numFmt numFmtId="165" formatCode="dd\\-mmm\\-yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF4338CA"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
+...sh.map((x,i)=>['xl/worksheets/sheet'+(i+1)+'.xml',x])])}
+function xl(k){try{dlb(xbuild((RP[k].x||RP[k].f)()),fnm(k)+'.xlsx');toast('Excel download ho gaya ✓')}catch(e){showErr('Excel error: '+e.message)}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a^=rx_]');if(!b)return;const t=b.dataset.a.slice(3),k=b.dataset.k||RK;if(t=='sel'){RK=k;render()}else if(t=='pr')ppr();else if(t=='wa')wsend();else if(t=='xl')xl(k);else csv(k)});
+
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&V!='add'&&V!='dadd')render()});
+
+/* Live bar (clock + sync status) and live currency rates */
+const FXK='loantracker_fx';let FX=null,FXB=false,LDAY='';try{FX=JSON.parse(localStorage.getItem(FXK))}catch(e){}
+function lvst(){if(!GH)return['','Sync off — Settings me connect karo'];if(/error/i.test(GST))return['er',GST];return[GST?'on':'',GST||'Connecting…']}
+function lvbar(){const n=new Date(),s=lvst();return `<div class="c row"><span><b id="lvt" style="font-size:20px;font-variant-numeric:tabular-nums">${n.toLocaleTimeString('en-IN')}</b><br><span class="mu" id="lvd">${n.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})}</span></span><span class="mu" style="text-align:right;max-width:48%"><i class="lv ${s[0]}" id="lvi"></i><span id="lvs">${s[1]}</span></span></div>`}
+function fxhtml(){if(!FX)return '<div class="mu">Rates load ho rahe hain…</div>';const R=FX.r,o=sum(L,left),f=c=>R[c]?`<div><span>1 ${c}</span><b>₹${(1/R[c]).toFixed(2)}</b></div>`:`<div><span>${c}</span><b>—</b></div>`;
+return `<div class="fx">${['USD','EUR','GBP','AED'].map(f).join('')}</div>${R.USD?`<div class="r mu"><span>Remaining loan in USD</span><b style="color:var(--tx)">$${Math.round(o*R.USD).toLocaleString('en-US')}</b></div>`:''}<div class="mu" style="margin-top:6px">${FX.err?'<span class="bad">Update fail — purana rate dikh raha hai · </span>':''}Updated ${new Date(FX.t).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>`}
+function fxcard(){return `<div class="c p"><div class="r"><b>Live exchange rates</b><button class="t" data-a="fx_now">${FXB?'…':'Refresh'}</button></div><div id="fxb">${fxhtml()}</div></div>`}
+function fxui(){const e=$('#fxb');if(e)e.innerHTML=fxhtml();const b=$('[data-a=fx_now]');if(b)b.textContent=FXB?'…':'Refresh'}
+async function fxget(force){if(FXB||(!force&&FX&&!FX.err&&Date.now()-FX.t<6e5))return;FXB=true;fxui();let r=null;
+try{const a=await fetch('https://open.er-api.com/v6/latest/INR',{cache:'no-store'});const j=await a.json();if(j.result!='success')throw 0;r=j.rates}
+catch(e){try{const a=await fetch('https://api.frankfurter.app/latest?from=INR&to=USD,EUR,GBP',{cache:'no-store'});r=(await a.json()).rates}catch(x){}}
+if(r&&r.USD){FX={t:Date.now(),r:{USD:r.USD,EUR:r.EUR,GBP:r.GBP,AED:r.AED}};try{localStorage.setItem(FXK,JSON.stringify(FX))}catch(e){}}else if(FX)FX.err=1;else FX={t:Date.now(),r:{},err:1};
+FXB=false;fxui();if(force)toast(r&&r.USD?'Rates updated ✓':'Rates nahi mile (internet check karo)')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a=fx_now]');if(b)fxget(true)});
+function lvtick(){const n=new Date(),t=$('#lvt');if(t){t.textContent=n.toLocaleTimeString('en-IN');const s=lvst(),i=$('#lvi'),x=$('#lvs');if(i)i.className='lv '+s[0];if(x)x.textContent=s[1]}
+const d=n.toDateString();if(LDAY&&d!=LDAY&&V!='add'&&V!='dadd')render();LDAY=d}
+LDAY=new Date().toDateString();setInterval(lvtick,1000);
+setInterval(()=>{if(!document.hidden)fxget()},6e5);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){fxget();lvtick()}});
+fxget();
+
+/* Finance dashboard */
+function home(){const A=L.filter(act),T=sum(L,tot),out=sum(L,left),pd=T-out,pc=T?pd/T*100:0,mo=sum(A,l=>l.emi),inc=+INC(),fo=inc?mo/inc*100:0,up=A.slice().sort((a,b)=>nxt(a)-nxt(b)),il=sum(A,l=>{const v=+an(l).il;return v>0?v:0}),h=new Date().getHours(),end=A.length?mon(new Date(Math.max(...A.map(l=>+an(l).end)))):'—',n=up[0];
+const tile=(t,v,c,s)=>`<div class="ft"><span>${t}</span><b style="color:${c||'var(--tx)'}">${v}</b>${s?`<em>${s}</em>`:''}</div>`;
+return `<div class="r"><h1>${h<12?'Good morning':h<17?'Good afternoon':'Good evening'}</h1><button class="pri" data-a="new">+ Add loan</button></div>${lvbar()}
+<div class="hero2"><div class="hl">Total outstanding</div><div class="hb">${inr(out)}</div><div class="hs">of ${inr(T)} · ${Math.round(pc)}% paid</div><div class="hbar"><i style="width:${pc}%"></i></div><div class="hr"><div><span>Monthly EMI</span><b>${inr(mo)}</b></div><div><span>Next due</span><b>${n?fd(nxt(n)):'—'}</b></div><div><span>Active loans</span><b>${A.length}</b></div></div></div>
+<div class="fg">${pies(A,T,out,pd,pc,mo,inc)}</div>
+<h2>Upcoming payments</h2><div class="c">${up.slice(0,4).map(l=>{const d=days(l);return `<div class="row"><span class="r" style="justify-content:flex-start"><span class="dot" style="background:${clr(d)}"></span><span><b>${l.lender}</b><br><span class="mu" style="color:${clr(d)}">${when(d)} · ${fd(nxt(l))}</span></span></span><span class="r"><b>${inr(l.emi)}</b><button class="pri" data-a="pay" data-id="${l.id}">Paid</button></span></div>`}).join('')||'<div class="row mu">Koi active loan nahi</div>'}</div>
+${fxcard()}${hind()}${dhome()}<button class="pri" onclick="go('loans')" style="width:100%;padding:13px;margin-bottom:8px">Open all loans</button>`}
+
+/* Pie dashboard */
+const PAL=['#6366f1','#22a559','#f08a00','#e5362b','#0ea5e9','#a855f7','#14b8a6','#94a3b8'];
+function pie(S,ct){S=S.filter(x=>x.v>0);const t=sum(S,x=>x.v);if(!t)return '<div class="mu" style="margin:auto">No data</div>';let c=0;
+return `<svg viewBox="0 0 36 36" class="pz"><circle cx="18" cy="18" r="15.9155" fill="none" stroke="#f1f3f6" stroke-width="5"/>${S.map(x=>{const p=x.v/t*100,o=25-c;c+=p;return `<circle cx="18" cy="18" r="15.9155" fill="none" stroke="${x.c}" stroke-width="5" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${o}"/>`}).join('')}${ct?`<text x="18" y="19.6" text-anchor="middle" font-size="5" font-weight="700" fill="#111418">${ct}</text>`:''}</svg><div class="lgd">${S.slice(0,3).map(x=>`<span><i style="background:${x.c}"></i>${x.n} ${Math.round(x.v/t*100)}%</span>`).join('')}</div>`}
+const sq=(t,b)=>`<div class="sq"><b>${t}</b>${b}</div>`;
+function pies(A,T,out,pd,pc,mo,inc){const P=sum(L,l=>+l.principal||0),ip=sum(L,l=>+an(l).ip||0),il=sum(A,l=>Math.max(0,+an(l).il||0)),
+by=f=>{const a=A.slice().sort((x,y)=>f(y)-f(x)),r=a.slice(0,5).map((l,i)=>({v:f(l),c:PAL[i],n:l.lender.split(' ')[0]})),o=sum(a.slice(5),f);if(o>0)r.push({v:o,c:PAL[7],n:'Others'});return r},
+dd=A.map(l=>({d:days(l),a:l.emi})),ds=g=>sum(dd.filter(g),x=>x.a);
+return [sq('Paid vs remaining',pie([{v:pd,c:PAL[1],n:'Paid'},{v:out,c:PAL[3],n:'Left'}],Math.round(pc)+'%')),
+sq('Principal vs interest',pie([{v:P,c:PAL[0],n:'Principal'},{v:Math.max(0,T-P),c:PAL[2],n:'Interest'}])),
+sq('Remaining by lender',pie(by(left))),
+sq('Monthly EMI share',pie(by(l=>l.emi),inr(mo).replace('₹','₹'))),
+sq('Interest paid vs left',pie([{v:ip,c:PAL[3],n:'Paid'},{v:il,c:PAL[2],n:'Left'}])),
+sq('EMI vs income',inc?pie([{v:mo,c:PAL[3],n:'EMI'},{v:Math.max(inc-mo,0),c:PAL[1],n:'Free'}],Math.round(mo/inc*100)+'%'):'<div class="mu" style="margin:auto;text-align:center">Settings me<br>income daalo</div>'),
+sq('Active vs closed',pie([{v:A.length,c:PAL[0],n:'Active'},{v:L.length-A.length,c:PAL[1],n:'Closed'}],A.length+'/'+L.length)),
+sq('Due timing',pie([{v:ds(x=>x.d<0),c:PAL[3],n:'Overdue'},{v:ds(x=>x.d>=0&&x.d<=7),c:PAL[2],n:'This week'},{v:ds(x=>x.d>7),c:PAL[0],n:'Later'}]))].join('')}
+render();
+
+/* Persisted view mode; laptop/desktop automatically uses full-width workspace. */
+(function(){
+ const root=document.documentElement, key='loantracker_view_mode';
+ function setView(mode){
+  mode=(mode==='classic'?'classic':'modern');
+  root.dataset.viewMode=mode;
+  try{localStorage.setItem(key,mode)}catch(e){}
+  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===mode));
+ }
+ let saved='modern';try{saved=localStorage.getItem(key)||'modern'}catch(e){}
+ setView(saved);
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+ const hint=document.getElementById('desktopHint');
+ function fitHint(){if(hint)hint.textContent=window.matchMedia('(min-width: 900px)').matches?'Desktop workspace · full-width fit':'Mobile layout · responsive';}
+ fitHint();window.addEventListener('resize',fitHint,{passive:true});
+})();
+</script></body></html>
